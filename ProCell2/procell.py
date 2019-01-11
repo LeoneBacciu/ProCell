@@ -3,7 +3,7 @@ from cell import Cell
 from numpy.random import normal
 from collections import defaultdict
 import sys
-
+from numpy.random import gamma
 
 def dummy(): return 0
 
@@ -24,7 +24,8 @@ class Simulator(object):
 		time_max=0, 
 		verbose=False,
 		phi=None,
-		synchronous_start=True
+		synchronous_start=True,
+		distribution="gauss"
 		):
 
 		self.stack = Stack()
@@ -32,7 +33,7 @@ class Simulator(object):
 		self.stack.create_stack_from_histogram( 
 			H0=histo, types=types, proportions=proportions, 
 			div_mean=div_mean, div_std=div_std, verbose=verbose,
-			synchronous_start=synchronous_start)
+			synchronous_start=synchronous_start, distribution=distribution)
 
 		result = defaultdict(dummy)
 		types  = defaultdict(list)
@@ -53,8 +54,16 @@ class Simulator(object):
 					daughter2.t = curcell.t
 					daughter1.type = curcell.type
 					daughter2.type = curcell.type
-					daughter1.timer = truncated_normal( div_mean[curcell.type], div_std[curcell.type] )
-					daughter2.timer = truncated_normal( div_mean[curcell.type], div_std[curcell.type] )
+					
+					if distribution=="gauss":
+						daughter1.timer = truncated_normal( div_mean[curcell.type], div_std[curcell.type] )
+						daughter2.timer = truncated_normal( div_mean[curcell.type], div_std[curcell.type] )
+					elif distribution=="gamma":
+						daughter1.timer = gamma( div_mean[curcell.type], div_std[curcell.type] )
+						daughter2.timer = gamma( div_mean[curcell.type], div_std[curcell.type] )
+					else:
+						raise Exception("Distribution %s not supported" % distribution)
+
 					self.stack.push(daughter1)
 					self.stack.push(daughter2)
 

@@ -1,6 +1,6 @@
 from numpy import loadtxt, array
 from random import random
-from numpy.random import normal
+from numpy.random import normal, gamma
 from cell import Cell
 import sys
 
@@ -47,8 +47,11 @@ class Stack(object):
 	def create_stack_from_histogram(self, 
 		H0=None, types=None, proportions=None,
 		div_mean=0, div_std=0, verbose=False,
-		synchronous_start=True
+		synchronous_start=True,
+		distribution="gauss"
 		):
+
+
 		if abs(sum(proportions.values())-1)>1e-6:
 			print "ERROR: proportions do not sum to 1 (%f)" % ( sum(proportions.values()) )
 			exit()
@@ -66,14 +69,29 @@ class Stack(object):
 				cell.type = type
 				cell.div_mean = div_mean[type]
 				cell.div_std  = div_std[type]
-				cell.timer = truncated_normal(cell.div_mean, cell.div_std)
+				if distribution=="gauss":
+					cell.timer = truncated_normal(cell.div_mean, cell.div_std)
+				elif distribution=="gamma":
+					if cell.div_std == 0:
+						cell.timer = sys.float_info.max
+					else:	
+						cell.timer = gamma(cell.div_mean, cell.div_std)
+				else:
+					raise Exception("Distribution %s not supported" % distribution)
 
 				# asynchronous start
 				if not synchronous_start:
-					cell.t = truncated_normal(cell.div_mean, cell.div_std) * random()
+					if distribution=="gauss":
+						cell.t = truncated_normal(cell.div_mean, cell.div_std) * random()
+					elif distribution=="gamma":
+						if cell.div_std==0: 
+							cell.t = 0
+						else:
+							cell.t = gamma(cell.div_mean, cell.div_std) * random()
 
 				self._stack.append(cell)
 		if verbose: print self._stack
+
 
 	def __repr__(self):
 		string = ""
