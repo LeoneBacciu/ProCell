@@ -851,7 +851,30 @@ class MainWindow(QtGui.QMainWindow):
 
 class OptimizationThread(QThread):
 
-	pass
+	countChanged = pyqtSignal(float)
+
+	def __init__(self, parent):
+		QThread.__init__(self)
+		self._parent=parent
+		self._parent.statusBar.showMessage("Optimization started. This process is time consuming, please wait...")
+		self.timer = QtCore.QTimer(self)
+		self.timer.setInterval(100)         
+		self.countChanged.connect(self._parent._update_statusbar)
+		self.timer.timeout.connect(self._update_status)
+		self.timer.start()
+
+	def __del__(self):
+		self.timer.stop()
+		self.quit()
+		self.wait()
+
+	def _update_status(self):
+		pass # TODO
+
+	def stop(self):
+		print " * Trying to abort optimization..."
+		self._parent._calibrator._abort_variable=True
+
 
 class SimulationThread(QThread):
 
@@ -865,14 +888,11 @@ class SimulationThread(QThread):
 		self.result_simulation = None
 		self.result_simulation_types = None
 		self._what=None
-
-
 		self.timer = QtCore.QTimer(self)
 		self.timer.setInterval(100)         
 		self.countChanged.connect(self._parent._update_statusbar)
 		self.timer.timeout.connect(self._update_status)
 		self._cells_in_stack = 0
-
 		self.timer.start()
 
 	def __del__(self):

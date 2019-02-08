@@ -1,19 +1,12 @@
 class Cell(object):
 
-	def __init__(self, fluorescence=0, cell_type=None, timer=None, global_time=0, ID=0, verbose=False):
-		if verbose:
-			print " * Creating cell with fluorescence", fluorescence, "of type", cell_type, "with timer", timer
-		self.fluorescence = fluorescence	
-		self.type = cell_type
-		self.timer = timer
-		self.ID = ID
-		self.T = 0.0
-		self.global_time = 0.0
+	def __init__(self, fluorescence):
+		self.t = 0
+		self.timer = 0
+		self.type = None
+		self.div_mean = 0
+		self.div_std  = 0
+		self.fluorescence = fluorescence
 
 	def __repr__(self):
-		return "CELL "+str(self.ID)+" INFO - time: "+str(self.T)+", fluorescence: " +str(self.fluorescence)
-
-	
-if __name__ == '__main__':
-	
-	C = Cell(fluorescence=10, timer=10)
+		return "<Cell of type=%s flu=%f>" % (self.type, self.fluorescence) 

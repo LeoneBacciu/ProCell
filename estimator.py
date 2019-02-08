@@ -254,6 +254,7 @@ class Calibrator(object):
 		self._time_max = 0
 		self.TGT = None
 		self._distribution = "gauss"
+		self._abort_variable = False
 
 	def set_types(self, types):
 		self._types = types
