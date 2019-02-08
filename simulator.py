@@ -217,7 +217,7 @@ class SimulationWrapper(object):
 		
 		self.CP = CellsPopulation(
 			initial_histogram=args['initial_histogram'],
-			timers=args['timers'],
+			timers=args['timers'],	
 			types_p=args['types_p'],
 			sigma=args['sigma']
 		)
