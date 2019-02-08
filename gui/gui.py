@@ -201,7 +201,7 @@ class MainWindow(QtGui.QMainWindow):
 		self._calibrator = Calibrator()
 		self._calibrator.distribution = "gauss"  # default semantics
 
-		self._load_project_from_file("model3.prc")
+		self._load_project_from_file("../models/model3.prc")
 
 		self.show()
 
@@ -823,30 +823,14 @@ class MainWindow(QtGui.QMainWindow):
 		self._calibrator.set_target_from_file(str(self._target_histo_path))
 		self._calibrator.set_output_dir("temp")
 
-		search_space = [ [1e-10,1.] for _ in self._population_names[1:] ]
+		print " * All information set, creating thread"
 
-		quiescent_indices = []
-		for n,v in enumerate(self._population_means):
-			if v!="-":
-				quiescent_indices.append(n)
+		self.OPTTHREAD = OptimizationThread(self)
 
-		copy_minmean = self._population_minmean; copy_minmean = [copy_minmean[i] for i in quiescent_indices]
-		copy_maxmean = self._population_maxmean; copy_maxmean = [copy_maxmean[i] for i in quiescent_indices]
-		copy_minsd = self._population_minsd; copy_minsd = [copy_minsd[i] for i in quiescent_indices]
-		copy_maxsd = self._population_maxsd; copy_maxsd = [copy_maxsd[i] for i in quiescent_indices]
+		print "   Optimizer ready, launching optimization"
 
-		search_space += [ [x,y] for (x,y) in zip(copy_minmean, copy_maxmean) ]
-		search_space += [ [x,y] for (x,y) in zip(copy_minsd, copy_maxsd) ]
-		#search_space += [ [x,y] for (x,y) in zip(self._population_minmean, self._population_maxmean) ]
-		#search_space += [ [x,y] for (x,y) in zip(self._population_minsd, self._population_maxsd) ]
-
-		print " * All information set, launching optimization"
-		res = self._calibrator.calibrate_gui(
-			max_iter=int(self.iterations.value()),
-			swarm_size=int(self.swarmsize.value()),
-			search_space=search_space,
-			form=self
-		)
+		self.OPTTHREAD.start()
+		#exit()
 
 
 class OptimizationThread(QThread):
@@ -856,7 +840,7 @@ class OptimizationThread(QThread):
 	def __init__(self, parent):
 		QThread.__init__(self)
 		self._parent=parent
-		self._parent.statusBar.showMessage("Optimization started. This process is time consuming, please wait...")
+		self._parent.statusBar.showMessage("Optimization is starting. This process is time consuming, please wait...")
 		self.timer = QtCore.QTimer(self)
 		self.timer.setInterval(100)         
 		self.countChanged.connect(self._parent._update_statusbar)
@@ -870,6 +854,35 @@ class OptimizationThread(QThread):
 
 	def _update_status(self):
 		pass # TODO
+
+	def run(self):
+
+		search_space = [ [1e-10,1.] for _ in self._parent._population_names[1:] ]
+
+		quiescent_indices = []
+		for n,v in enumerate(self._parent._population_means):
+			if v!="-":
+				quiescent_indices.append(n)
+
+		copy_minmean = self._parent._population_minmean; copy_minmean = [copy_minmean[i] for i in quiescent_indices]
+		copy_maxmean = self._parent._population_maxmean; copy_maxmean = [copy_maxmean[i] for i in quiescent_indices]
+		copy_minsd = self._parent._population_minsd; copy_minsd = [copy_minsd[i] for i in quiescent_indices]
+		copy_maxsd = self._parent._population_maxsd; copy_maxsd = [copy_maxsd[i] for i in quiescent_indices]
+
+		search_space += [ [x,y] for (x,y) in zip(copy_minmean, copy_maxmean) ]
+		search_space += [ [x,y] for (x,y) in zip(copy_minsd, copy_maxsd) ]
+		#search_space += [ [x,y] for (x,y) in zip(self._population_minmean, self._population_maxmean) ]
+		#search_space += [ [x,y] for (x,y) in zip(self._population_minsd, self._population_maxsd) ]
+
+
+		print " GO"
+		res = self._parent._calibrator.calibrate_gui(
+			max_iter=int(self._parent.iterations.value()),
+			swarm_size=int(self._parent.swarmsize.value()),
+			search_space=search_space,
+			form=self._parent
+		)
+
 
 	def stop(self):
 		print " * Trying to abort optimization..."

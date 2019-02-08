@@ -97,6 +97,18 @@ border: 0px solid black;
            <layout class="QVBoxLayout" name="population_layout">
             <item>
              <widget class="QPushButton" name="addnewpopulation">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>40</height>
+               </size>
+              </property>
               <property name="text">
                <string>Add new population</string>
               </property>
@@ -107,8 +119,8 @@ border: 0px solid black;
               </property>
               <property name="iconSize">
                <size>
-                <width>24</width>
-                <height>24</height>
+                <width>16</width>
+                <height>16</height>
                </size>
               </property>
               <property name="flat">
@@ -285,29 +297,6 @@ border: 0px solid black;
               </property>
              </widget>
             </item>
-            <item row="7" column="4">
-             <widget class="QCommandLinkButton" name="runvalidation">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Validate</string>
-              </property>
-              <property name="icon">
-               <iconset resource="resources.qrc">
-                <normaloff>:/buttons/validate.png</normaloff>:/buttons/validate.png</iconset>
-              </property>
-              <property name="iconSize">
-               <size>
-                <width>20</width>
-                <height>20</height>
-               </size>
-              </property>
-             </widget>
-            </item>
             <item row="3" column="0">
              <widget class="QLabel" name="label_8">
               <property name="sizePolicy">
@@ -476,38 +465,6 @@ border: 0px solid black;
               </property>
              </widget>
             </item>
-            <item row="7" column="2">
-             <widget class="QCommandLinkButton" name="launch_simulation">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true"/>
-              </property>
-              <property name="text">
-               <string>Simulate</string>
-              </property>
-              <property name="icon">
-               <iconset resource="resources.qrc">
-                <normaloff>:/buttons/play.png</normaloff>:/buttons/play.png</iconset>
-              </property>
-              <property name="shortcut">
-               <string>F5</string>
-              </property>
-              <property name="default">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
             <item row="6" column="2">
              <widget class="QCheckBox" name="normtotarget">
               <property name="enabled">
@@ -524,20 +481,6 @@ border: 0px solid black;
               </property>
               <property name="checked">
                <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="5">
-             <widget class="QCommandLinkButton" name="abort">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Abort</string>
-              </property>
-              <property name="icon">
-               <iconset resource="resources.qrc">
-                <normaloff>:/buttons/stop.png</normaloff>:/buttons/stop.png</iconset>
               </property>
              </widget>
             </item>
@@ -560,27 +503,7 @@ border: 0px solid black;
            </property>
            <layout class="QGridLayout" name="gridLayout_6">
             <item row="5" column="1">
-             <layout class="QVBoxLayout" name="verticalLayout_3">
-              <item>
-               <widget class="QCommandLinkButton" name="launchoptimization">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>500</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Fit to target histogram</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <layout class="QVBoxLayout" name="verticalLayout_3"/>
             </item>
             <item row="2" column="1">
              <widget class="QSpinBox" name="iterations">
@@ -713,6 +636,116 @@ border: 0px solid black;
              </spacer>
             </item>
            </layout>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QPushButton" name="launch_simulation">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>1</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string>Simulate</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/buttons/play.png</normaloff>:/buttons/play.png</iconset>
+           </property>
+           <property name="shortcut">
+            <string>F5</string>
+           </property>
+           <property name="default">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="runvalidation">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>1</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Validate</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/buttons/validate.png</normaloff>:/buttons/validate.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QPushButton" name="launchoptimization">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>1</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>500</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Fit to target histogram</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="4">
+          <widget class="QPushButton" name="abort">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>1</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Abort</string>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/buttons/stop.png</normaloff>:/buttons/stop.png</iconset>
+           </property>
           </widget>
          </item>
         </layout>
@@ -1233,10 +1266,6 @@ border: 0px solid black;
   <tabstop>comboBox</tabstop>
   <tabstop>swarmsize</tabstop>
   <tabstop>iterations</tabstop>
-  <tabstop>launch_simulation</tabstop>
-  <tabstop>runvalidation</tabstop>
-  <tabstop>launchoptimization</tabstop>
-  <tabstop>abort</tabstop>
   <tabstop>usecolors</tabstop>
   <tabstop>logarithmic</tabstop>
  </tabstops>
@@ -1301,22 +1330,6 @@ border: 0px solid black;
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>588</x>
-     <y>348</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>launch_simulation</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>run_simulation()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>361</x>
-     <y>637</y>
     </hint>
     <hint type="destinationlabel">
      <x>588</x>
@@ -1501,38 +1514,6 @@ border: 0px solid black;
    </hints>
   </connection>
   <connection>
-   <sender>runvalidation</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>run_validation()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>357</x>
-     <y>870</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>587</x>
-     <y>470</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>abort</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>_cancel_simulation()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>517</x>
-     <y>729</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>587</x>
-     <y>400</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionImport_validation_histogram</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
@@ -1645,18 +1626,50 @@ border: 0px solid black;
    </hints>
   </connection>
   <connection>
+   <sender>launch_simulation</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>run_simulation()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>159</x>
+     <y>571</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>587</x>
+     <y>488</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>runvalidation</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>run_validation()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>445</x>
+     <y>571</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>587</x>
+     <y>488</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>launchoptimization</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>optimize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>984</x>
-     <y>425</y>
+     <x>730</x>
+     <y>571</y>
     </hint>
     <hint type="destinationlabel">
      <x>587</x>
-     <y>400</y>
+     <y>488</y>
     </hint>
    </hints>
   </connection>
