@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>643</width>
-    <height>311</height>
+    <height>348</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,7 +24,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
-    <normaloff>:/buttons/Tette.png</normaloff>:/buttons/Tette.png</iconset>
+    <normaloff>:/buttons/cells.png</normaloff>:/buttons/cells.png</iconset>
   </property>
   <property name="modal">
    <bool>true</bool>

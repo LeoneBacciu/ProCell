@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
-    <normaloff>:/buttons/Tette.png</normaloff>:/buttons/Tette.png</iconset>
+    <normaloff>:/buttons/cells.png</normaloff>:/buttons/cells.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true"/>

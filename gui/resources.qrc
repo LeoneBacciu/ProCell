@@ -2,8 +2,8 @@
   <qresource prefix="buttons">
     <file>play.png</file>
     <file>validate.png</file>
-    <file>Tette.png</file>
     <file>smile.jpg</file>
+    <file>cells.png</file>
     <file>stop.png</file>
     <file>cancel.png</file>
     <file>addnew.png</file>
