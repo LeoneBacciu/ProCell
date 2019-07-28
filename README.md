@@ -17,6 +17,10 @@ This part is still under development. I am setting up the GITHUB repository and 
 
 Meanwhile, you can just download the source code and launch ProCell's GUI (python gui/gui.py). A tutorial about modeling, calibration and simulation will be published soon.
 
+## GPU version of ProCell
+
+We are developing a GPU-accelerated version of ProCell, able to strongly reduce the computational effort of simulations. The alpha implementation can be downloaded from: https://github.com/ericniso/cuda-pro-cell
+
 ## More info about ProCell
 
 If you need additional information about ProCell please write to: nobile@disco.unimib.it.
