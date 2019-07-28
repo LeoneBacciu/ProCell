@@ -807,10 +807,17 @@ border: 0px solid black;
     <addaction name="actionAdd_new_population"/>
     <addaction name="actionRemove_selected_population"/>
    </widget>
+   <widget class="QMenu" name="menu_Settings">
+    <property name="title">
+     <string>&amp;Settings</string>
+    </property>
+    <addaction name="action_Preferences"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Histograms"/>
    <addaction name="menuPopulations"/>
    <addaction name="menu_Task"/>
+   <addaction name="menu_Settings"/>
    <addaction name="menu_Help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -1248,6 +1255,11 @@ border: 0px solid black;
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="action_Preferences">
+   <property name="text">
+    <string>&amp;Preferences...</string>
    </property>
   </action>
  </widget>

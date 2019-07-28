@@ -21,6 +21,8 @@ except:
 	print "WARNING: Seaborn not installed"
 from estimator import Calibrator
 
+def dummy(): return 0
+
 matplotlib.rcParams.update({'font.size': 8})
 
 def spawn():
@@ -202,6 +204,9 @@ class MainWindow(QtGui.QMainWindow):
 		self._calibrator.distribution = "gauss"  # default semantics
 
 		self._load_project_from_file("../models/model3.prc")
+
+		# implement in preferences (TODO)
+		self._path_to_GPU_procell = "D:\\GITHUBrepos\\cuda-pro-cell\\build\\bin\\Release\\procell.exe"
 
 		self.show()
 
@@ -804,6 +809,27 @@ class MainWindow(QtGui.QMainWindow):
 	"""
 
 
+	def _done_optimization(self):
+		result_optimization = self.OPTTHREAD._dictionaries_results
+		
+		print " * Optimization completed"
+		props, means, stdivs = result_optimization
+		print props
+		print means 
+		print stdivs
+
+		namepos_dict = {}
+		for name, n in zip(self._population_names, range(len(self._population_names))):
+			namepos_dict[name]=n
+
+		for k,v in namepos_dict.items():
+			self._population_proportions[v] = props[k]
+			self._population_means[v] = means[k]
+			self._population_std[v] = stdivs[k]
+
+		self._update_populations()
+
+
 	def optimize(self):
 		if not self._ready_to_simulate():	
 			if not self._query_for_initial():
@@ -826,11 +852,11 @@ class MainWindow(QtGui.QMainWindow):
 		print " * All information set, creating thread"
 
 		self.OPTTHREAD = OptimizationThread(self)
+		self.connect(self.OPTTHREAD, QtCore.SIGNAL("finished()"), self._done_optimization)
 
 		print "   Optimizer ready, launching optimization"
 
 		self.OPTTHREAD.start()
-		#exit()
 
 
 class OptimizationThread(QThread):
@@ -840,6 +866,11 @@ class OptimizationThread(QThread):
 	def __init__(self, parent):
 		QThread.__init__(self)
 		self._parent=parent
+
+		self._solution_optimization = None
+		self._fitness_solution_optimization = None
+		self._dictionaries_results = None
+
 		self._parent.statusBar.showMessage("Optimization is starting. This process is time consuming, please wait...")
 		self.timer = QtCore.QTimer(self)
 		self.timer.setInterval(100)         
@@ -876,12 +907,17 @@ class OptimizationThread(QThread):
 
 
 		print " GO"
-		res = self._parent._calibrator.calibrate_gui(
+		self._solution_optimization, self._fitness_solution_optimization = self._parent._calibrator.calibrate_gui(
 			max_iter=int(self._parent.iterations.value()),
 			swarm_size=int(self._parent.swarmsize.value()),
 			search_space=search_space,
 			form=self._parent
 		)
+
+		print self._solution_optimization, self._fitness_solution_optimization
+		from estimator import fitness_gui
+		self._dictionaries_results = fitness_gui(self._solution_optimization.X, arguments = {'form': self._parent}, return_dictionaries=True)
+		
 
 
 	def stop(self):
@@ -926,6 +962,41 @@ class SimulationThread(QThread):
 			elapsed = 0
 		self.countChanged.emit(elapsed*100)
 
+	def _prepare_files_for_GPU(self, names, prop, mean, st):
+		# each cell population = one row
+		# proportion [space] mean [space] std
+		with open("__temporary__", "w") as fo:
+			for name in names:
+				fo.write(str(prop[name])+" ")
+				fo.write(str(mean[name])+" ")
+				fo.write(str(st[name])+"\n")
+		
+	def _launch_GPU_simulation(self, executable, initial_histo, model_file, time_max, PHI, names):
+		from subprocess import check_output
+		from collections import defaultdict
+
+		ret = check_output([executable, "-h", initial_histo, "-c", model_file, "-t", str(time_max), "-p", str(PHI), "-r"])
+		split_rows = ret.split("\n")
+
+		result = defaultdict(dummy)
+		types  = defaultdict(list)
+
+		for row in split_rows:
+			row = row.strip("\r")
+			try:
+				tokenized_row = map(float, row.split("\t"))
+			except ValueError:
+				continue
+			fluorescence = tokenized_row[0]
+			total = tokenized_row[1]
+			result[fluorescence]=total
+
+			for n, amount in enumerate(tokenized_row[2:]):
+				types[fluorescence].append([names[n]]*int(amount))
+
+		return result, types
+
+
 	def run(self):
 		
 		if self._what is None:
@@ -939,31 +1010,55 @@ class SimulationThread(QThread):
 
 		PHI      = float(self._parent.fluorescencethreshold.value())
 
-		fixed_means = map(lambda x: x if isinstance(x, float) else sys.float_info.max, self._parent._population_means)
-		fixed_std   = map(lambda x: x if isinstance(x, float) else 0, self._parent._population_std)
 
-		proportions 	= dict(zip(self._parent._population_names, self._parent._population_proportions))
-		means 			= dict(zip(self._parent._population_names, fixed_means))
-		stdev 			= dict(zip(self._parent._population_names, fixed_std))
+		if self._parent._path_to_GPU_procell != None:
+			print " * Launching GPU-powered simulation"
+			print "   preparing files..."
 
-		self.result_simulation, self.result_simulation_types = self._parent.Simulator.simulate(
-			path=self._parent._initial_histo_path, 
-			types=self._parent._population_names, 
-			proportions=proportions,
-			div_mean=means, 
-			div_std=stdev, 
-			time_max=time_max, 
-			verbose=False, 
-			phi=PHI, 
-			distribution="gauss", 
-			synchronous_start=False)
+			fixed_means = map(lambda x: x if isinstance(x, float) else -1., self._parent._population_means)
+			fixed_std   = map(lambda x: x if isinstance(x, float) else -1., self._parent._population_std)
+			
+			proportions 	= dict(zip(self._parent._population_names, self._parent._population_proportions))
+			means 			= dict(zip(self._parent._population_names, fixed_means))
+			stdev 			= dict(zip(self._parent._population_names, fixed_std))
 
+			self._prepare_files_for_GPU(self._parent._population_names, proportions, means, stdev)
+			self.result_simulation, self.result_simulation_types = self._launch_GPU_simulation(
+				self._parent._path_to_GPU_procell, 
+				self._parent._initial_histo_path, "__temporary__", 
+				time_max, 
+				PHI,
+				self._parent._population_names
+				)
 
-		if self._parent.Simulator._abort_variable:
-			print " * Simulation aborted successfully"
+			return
 		else:
-			#print " * Simulation completed successfully"
-			pass
+
+			fixed_means = map(lambda x: x if isinstance(x, float) else sys.float_info.max, self._parent._population_means)
+			fixed_std   = map(lambda x: x if isinstance(x, float) else 0, self._parent._population_std)
+			
+			proportions 	= dict(zip(self._parent._population_names, self._parent._population_proportions))
+			means 			= dict(zip(self._parent._population_names, fixed_means))
+			stdev 			= dict(zip(self._parent._population_names, fixed_std))
+
+			self.result_simulation, self.result_simulation_types = self._parent.Simulator.simulate(
+				path=self._parent._initial_histo_path, 
+				types=self._parent._population_names, 
+				proportions=proportions,
+				div_mean=means, 
+				div_std=stdev, 
+				time_max=time_max, 
+				verbose=False, 
+				phi=PHI, 
+				distribution="gauss", 
+				synchronous_start=False)
+
+
+			if self._parent.Simulator._abort_variable:
+				print " * Simulation aborted successfully"
+			else:
+				#print " * Simulation completed successfully"
+				pass
 
 
 	def stop(self):

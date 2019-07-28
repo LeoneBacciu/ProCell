@@ -61,7 +61,7 @@ def fitness_evaluate(CP, TGT, N=1000, draw=False):
 	return fitness, stats.ks_2samp(res1, res2)
 
 
-def fitness_gui(p, arguments):
+def fitness_gui(p, arguments, return_dictionaries=False):
 
 	def rel2abs_prob(V):
 		putative_proportions = [V[0]]
@@ -107,7 +107,7 @@ def fitness_gui(p, arguments):
 
 	Sim = Simulator()
 
-	print "Testing the following parmeterization:"
+	print "Testing the following parameterization:"
 	print " - Proportions:", proportions
 	print " - Mean:", mean_div
 	print " - STD:", std_div
@@ -146,7 +146,8 @@ def fitness_gui(p, arguments):
 
 	print " - Fitness:", fitness, "\n"
 
-	return fitness
+	if return_dictionaries==False: 	return fitness
+	return proportions, mean_div, std_div
 
 
 
@@ -396,17 +397,13 @@ class Calibrator(object):
 		print "   using distribution: %s" % self._distribution
 
 		FP = LogFSTPSO()
-		FP.set_swarm_size(swarm_size)
 		FP.dump_fitness = self._outputdir+os.sep+"%s_rep%d_%s_fitness_%s.txt" % (self._modelname, repetition, self._distribution, str(self.time_stamp())) 
 		FP.dump_struct = self._outputdir+os.sep+"%s_rep%d_%s_structure_%s.txt" % (self._modelname, repetition, self._distribution, str(self.time_stamp())) 
-
-		self.init_dump(FP.dump_fitness, FP.dump_struct)
+		FP.set_search_space(search_space)
+		FP.set_fitness(fitness_gui, skip_test=True, arguments = {'form': form})
+		FP.set_swarm_size(swarm_size)
 
 		FP.disable_fuzzyrule_minvelocity()
-	
-		FP.set_search_space(search_space)
-
-		FP.set_fitness(fitness_gui, skip_test=True, arguments = {'form': form})
 		
 		return FP.solve_with_fstpso(creation_method={'name': 'uniform'}, 			
 			max_iter=max_iter, 
@@ -421,16 +418,25 @@ if __name__ == "__main__":
 
 	distribution = "gauss"
 
+	initial_histogram = "./target_GFPpos/AML9_Exp3_t10d_UT1_BM_GFPpos.txt"
+	target_histogram  = "./target_GFPpos/AML9_Exp3_t10d_DOX3_BM_GFPpos.txt"
+
 	try:
-		opts, args = getopt.getopt(argv[1:],"m:o:r:d:",["model=", "output=", "repetition=", "distribution="])
+		opts, args = getopt.getopt(argv[1:],"i:t:m:o:r:d:",["initial=", "target=", "model=", "output=", "repetition=", "distribution="])
 	except getopt.GetoptError:
-		print 'test.py -m <model> -o <outputdir> -r <repetition> -d <distribution>'
+		print 'test.py -i <initial histogram> -t <target histogram> -m <model> -o <outputdir> -r <repetition> -d <distribution>'
 		sys.exit(2)
 	
 	for opt, arg in opts:
 		if opt == '-h':
-			print 'test.py -i <inputfile> -o <outputdir> -r <repetition> -d <distribution>'
+			print 'test.py -i <initial> -t <target> -o <outputdir> -r <repetition> -d <distribution>'
 			sys.exit()
+		elif opt in ("-i", "--initial"):
+			initial_histogram = arg
+			print " * Using initial histogram", initial_histogram
+		elif opt in ("-t", "--target"):
+			target_histogram = arg
+			print " * Using target histogram", target_histogram
 		elif opt in ("-m", "--model"):
 			model = arg
 			print " * Using model", model
@@ -460,8 +466,8 @@ if __name__ == "__main__":
 	C.set_output_dir(outputdir)
 	C.set_types(types)
 	C.set_time_max(10*24) #hours
-	C.set_initial_histogram_from_file("./target_GFPpos/AML9_Exp3_t10d_UT1_BM_GFPpos.txt")
-	C.set_target_from_file("./target_GFPpos/AML9_Exp3_t10d_DOX3_BM_GFPpos.txt")
+	C.set_initial_histogram_from_file(initial_histogram)
+	C.set_target_from_file(target_histogram)
 
 	res = C.calibrate(repetition=repetition, max_iter=100)
 	print res
