@@ -485,19 +485,35 @@ class MainWindow(QtGui.QMainWindow):
 			print "WARNING: target histogram not loaded, aborting."
 		return False
 
+	def _check_proportions(self):
+		return  (sum(self._population_proportions)-1.0)<1e-3
+
+
 	def run_simulation(self):
 		if self._ready_to_simulate():
-			self.YTN = SimulationThread(self)
-			self.YTN._what="target"
-			
-			self.connect(self.YTN, QtCore.SIGNAL("finished()"), self._done_simulation)
+			if self._check_proportions():
 
-			self.launch_simulation.setEnabled(False)
-			self.runvalidation.setEnabled(False)
-			self.abort.setEnabled(True)
-			self.YTN.start()
+				self.YTN = SimulationThread(self)
+				self.YTN._what="target"
+				
+				self.connect(self.YTN, QtCore.SIGNAL("finished()"), self._done_simulation)
+
+				self.launch_simulation.setEnabled(False)
+				self.runvalidation.setEnabled(False)
+				self.abort.setEnabled(True)
+				self.YTN.start()
+			else:
+				self._error_proportions()
 		else:
 			self._query_for_initial()
+
+	def _error_proportions(self):
+		msg = QtGui.QMessageBox()
+		msg.setIcon(QtGui.QMessageBox.Critical)
+		msg.setText("The sum of proportions is not 1. Please check the proportion of cells.")
+		msg.setWindowTitle("Unable to run simulation")
+		#msg.setStandardButtons(QtGui.QMessageBox.OK)
+		ret = msg.exec_()
 
 	def _query_for_initial(self):
 		msg = QtGui.QMessageBox()
@@ -906,7 +922,7 @@ class OptimizationThread(QThread):
 		#search_space += [ [x,y] for (x,y) in zip(self._population_minsd, self._population_maxsd) ]
 
 
-		print " GO"
+		print " * OPTIMIZATION IS STARTING (please be patient...)"
 		self._solution_optimization, self._fitness_solution_optimization = self._parent._calibrator.calibrate_gui(
 			max_iter=int(self._parent.iterations.value()),
 			swarm_size=int(self._parent.swarmsize.value()),
@@ -1011,9 +1027,9 @@ class SimulationThread(QThread):
 		PHI      = float(self._parent.fluorescencethreshold.value())
 
 
-		if self._parent._path_to_GPU_procell != None:
+		if self._parent._path_to_GPU_procell is not None:
 			print " * Launching GPU-powered simulation"
-			print "   preparing files..."
+			print "   preparing files...",
 
 			fixed_means = map(lambda x: x if isinstance(x, float) else -1., self._parent._population_means)
 			fixed_std   = map(lambda x: x if isinstance(x, float) else -1., self._parent._population_std)
@@ -1030,6 +1046,8 @@ class SimulationThread(QThread):
 				PHI,
 				self._parent._population_names
 				)
+
+			print "done"
 
 			return
 		else:

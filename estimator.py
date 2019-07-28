@@ -6,8 +6,55 @@ from scipy.linalg import norm
 from fitness import rebin
 import getopt
 import datetime, time
+from subprocess import check_output
+from collections import defaultdict
+
 
 _SQRT2 = np.sqrt(2)
+
+def dummy(): return 0
+
+def _prepare_files_for_GPU(names, prop, mean, st):
+	# each cell population = one row
+	# proportion [space] mean [space] std
+	with open("__temporary__", "w") as fo:
+		for name in names:
+			fo.write(str(prop[name])+" ")
+			fo.write(str(mean[name])+" ")
+			fo.write(str(st[name])+"\n")
+
+def _launch_GPU_simulation(executable, initial_histo, model_file, time_max, PHI, names):
+
+	"""
+	print "I RECEIVED"
+	print executable
+	print initial_histo
+	print model_file
+	print time_max
+	print PHI
+	print names
+	"""
+
+	ret = check_output([executable, "-h", initial_histo, "-c", model_file, "-t", str(time_max), "-p", str(PHI), "-r"])
+	split_rows = ret.split("\n")
+
+	result = defaultdict(dummy)
+	types  = defaultdict(list)
+
+	for row in split_rows:
+		row = row.strip("\r")
+		try:
+			tokenized_row = map(float, row.split("\t"))
+		except ValueError:
+			continue
+		fluorescence = tokenized_row[0]
+		total = tokenized_row[1]
+		result[fluorescence]=total
+
+		for n, amount in enumerate(tokenized_row[2:]):
+			types[fluorescence].append([names[n]]*int(amount))
+
+	return result, types
 
 
 class LogFSTPSO(FuzzyPSO):
@@ -76,7 +123,6 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 		putative_proportions.append(1.-consumed)
 		return putative_proportions
 
-	print p
 	gui = arguments['form']
 	names = gui._population_names
 	N = len(names)
@@ -117,32 +163,53 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 	lower = float(gui.lowerbin.value())
 	higher = float(gui.higherbin.value())
 	calcbins = int(gui.bins.value())
+	PHI      = float(gui.fluorescencethreshold.value())
 
-	result_simulation, result_simulation_types = Sim.simulate(
-			path=gui._initial_histo_path, 
-			types=names, 
-			proportions=proportions,
-			div_mean=mean_div,
-			div_std=std_div, 
-			time_max=time_max, 
-			verbose=False, 
-			phi=phi, 
-			distribution="gauss"
-		)
+	if gui._path_to_GPU_procell is not None:
+		#print " * Launching GPU-powered simulation"
+		#print "   preparing files...", 
+
+		fixed_means = map(lambda x: x if isinstance(x, float) else -1., gui._population_means)
+		fixed_std   = map(lambda x: x if isinstance(x, float) else -1., gui._population_std)
+		
+		proportions 	= dict(zip(gui._population_names, gui._population_proportions))
+		means 			= dict(zip(gui._population_names, fixed_means))
+		stdev 			= dict(zip(gui._population_names, fixed_std))
+
+		_prepare_files_for_GPU(gui._population_names, proportions, means, stdev)
+
+		try:
+			result_simulation, result_simulation_types = _launch_GPU_simulation(
+				gui._path_to_GPU_procell, 
+				gui._initial_histo_path, 
+				"__temporary__", 
+				time_max, 
+				PHI,
+				names
+				)
+		except:
+			print "ERROR: simulation on GPU crashed for unknown reasons."
+
+		#print "done"
+
+	else: 
+		result_simulation, result_simulation_types = Sim.simulate(
+				path=gui._initial_histo_path, 
+				types=names, 
+				proportions=proportions,
+				div_mean=mean_div,
+				div_std=std_div, 
+				time_max=time_max, 
+				verbose=False, 
+				phi=phi, 
+				distribution="gauss"
+			)
 
 	sorted_res = array(sorted([ [a,b] for (a,b) in zip(result_simulation.keys(), result_simulation.values())]))
 	result_simulation_rebinned, bins_result_simulation_rebinned = rebin(sorted_res, lower, higher, N=calcbins)
 	target_rebinned, bins_target_rebinned   	= rebin(gui._target_histo, lower, higher, N=calcbins)
-
 	ratio = 1.0*sum(result_simulation_rebinned)/sum(target_rebinned)
-
-	#plot(result_simulation_rebinned/ratio)
-	#plot(target_rebinned)
-	#print sum(result_simulation_rebinned/ratio)
-	#print sum(target_rebinned)
-	#show()
 	fitness = hellinger1(result_simulation_rebinned/ratio, target_rebinned)
-	#fitness = fitness_evaluate(result_simulation_rebinned, target_rebinned)
 
 	print " - Fitness:", fitness, "\n"
 
