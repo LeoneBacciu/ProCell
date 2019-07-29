@@ -674,6 +674,25 @@ class MainWindow(QtGui.QMainWindow):
 				self._update_populations()
 
 
+
+	def _check_boundaries_for_pe(self):
+		all_values = self._population_minsd + self._population_maxsd +  self._population_minmean + self._population_maxmean
+		ready = len(filter(lambda x: x==0, all_values))==0
+		if not ready:
+			print "WARNING: some boundaries are not set"
+
+			msg = QtGui.QMessageBox()
+			msg.setIcon(QtGui.QMessageBox.Critical)
+			msg.setText("Some boundaries were not set properly. Please set all boundaries (for both mean and standard deviation) before running parameters fitting.")
+			msg.setWindowTitle("Unable to run optimization")
+			#msg.setStandardButtons(QtGui.QMessageBox.OK)
+			ret = msg.exec_()
+
+			return False
+		else:
+			return True
+
+
 	def save_project(self):
 		"""
 			Two cases:		
@@ -847,12 +866,19 @@ class MainWindow(QtGui.QMainWindow):
 
 
 	def optimize(self):
+
+
 		if not self._ready_to_simulate():	
 			if not self._query_for_initial():
 				return
+
 		if not self._ready_to_optimize():
 			if not self._query_for_target():
 				return
+		
+		if not self._check_boundaries_for_pe():
+			return
+
 
 		try:
 			os.mkdir("temp")
