@@ -654,14 +654,14 @@ class MainWindow(QtGui.QMainWindow):
 
 		# min std
 		elif index.column()==6:
-			item, ok  = QtGui.QInputDialog.getDouble(self, "Search space", "Enter minimum value for standard deviation:", float(current_value), 0)
+			item, ok  = QtGui.QInputDialog.getDouble(self, "Search space", "Enter minimum value for standard deviation:", float(current_value), 0, 1e6, 3)
 			if ok and item:
 				self._population_minsd[index.row()] = item
 				self._update_populations()
 
 		# max std
 		elif index.column()==7:
-			item, ok  = QtGui.QInputDialog.getDouble(self, "Search space", "Enter maximum value for standard deviation:", float(current_value), 0)
+			item, ok  = QtGui.QInputDialog.getDouble(self, "Search space", "Enter maximum value for standard deviation:", float(current_value),  0, 1e6, 3)
 			if ok and item:
 				self._population_maxsd[index.row()] = item
 				self._update_populations()
