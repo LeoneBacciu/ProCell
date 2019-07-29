@@ -864,6 +864,7 @@ class MainWindow(QtGui.QMainWindow):
 		self._calibrator.set_initial_histogram_from_file(str(self._initial_histo_path))
 		self._calibrator.set_target_from_file(str(self._target_histo_path))
 		self._calibrator.set_output_dir("temp")
+		self._calibrator.set_model_name(self.projectname.text())
 
 		print " * All information set, creating thread"
 
@@ -922,15 +923,18 @@ class OptimizationThread(QThread):
 		#search_space += [ [x,y] for (x,y) in zip(self._population_minsd, self._population_maxsd) ]
 
 
-		print " * OPTIMIZATION IS STARTING (please be patient...)"
-		self._solution_optimization, self._fitness_solution_optimization = self._parent._calibrator.calibrate_gui(
-			max_iter=int(self._parent.iterations.value()),
-			swarm_size=int(self._parent.swarmsize.value()),
-			search_space=search_space,
-			form=self._parent
-		)
+		for rep in xrange(int(self._parent.repetitions.value())):
+			print " * OPTIMIZATION %d IS STARTING (please be patient...)" % (rep)
+			self._solution_optimization, self._fitness_solution_optimization = \
+				self._parent._calibrator.calibrate_gui(
+					max_iter=int(self._parent.iterations.value()),
+					swarm_size=int(self._parent.swarmsize.value()),
+					search_space=search_space,
+					form=self._parent,
+					repetition=rep
+				)
 
-		print self._solution_optimization, self._fitness_solution_optimization
+		#print self._solution_optimization, self._fitness_solution_optimization
 		from estimator import fitness_gui
 		self._dictionaries_results = fitness_gui(self._solution_optimization.X, arguments = {'form': self._parent}, return_dictionaries=True)
 		

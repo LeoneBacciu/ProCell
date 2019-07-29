@@ -451,7 +451,7 @@ class Calibrator(object):
 
 
 	def calibrate_gui(self, repetition=0, max_iter=10, search_space=None, 
-		swarm_size=50, form=None):
+		swarm_size=50, form=None, append_time_stamp=False):
 
 		# controls
 		if self._types == []: 		raise Exception("Types of cells not specified")
@@ -463,9 +463,14 @@ class Calibrator(object):
 		print " * Initial controls passed, loading FST-PSO"
 		print "   using distribution: %s" % self._distribution
 
+		if append_time_stamp:
+			time_stamp = str(self.time_stamp())
+		else:
+			time_stamp = ""
+
 		FP = LogFSTPSO()
-		FP.dump_fitness = self._outputdir+os.sep+"%s_rep%d_%s_fitness_%s.txt" % (self._modelname, repetition, self._distribution, str(self.time_stamp())) 
-		FP.dump_struct = self._outputdir+os.sep+"%s_rep%d_%s_structure_%s.txt" % (self._modelname, repetition, self._distribution, str(self.time_stamp())) 
+		FP.dump_fitness = self._outputdir+os.sep+"%s_rep%d_%s_fitness_%s.txt" % (self._modelname, repetition, self._distribution, time_stamp) 
+		FP.dump_struct = self._outputdir+os.sep+"%s_rep%d_%s_structure_%s.txt" % (self._modelname, repetition, self._distribution, time_stamp) 
 		FP.set_search_space(search_space)
 		FP.set_fitness(fitness_gui, skip_test=True, arguments = {'form': form})
 		FP.set_swarm_size(swarm_size)
