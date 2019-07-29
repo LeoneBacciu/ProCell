@@ -20,6 +20,7 @@ try:
 except:
 	print "WARNING: Seaborn not installed"
 from estimator import Calibrator
+from ConfigParser import SafeConfigParser
 
 def dummy(): return 0
 
@@ -99,7 +100,15 @@ class AboutWindow(QtGui.QDialog):
 		super(AboutWindow, self).__init__()
 		uic.loadUi('about.ui', self)
 		
+class PreferencesWindow(QtGui.QDialog):
 
+	def __init__(self):
+		super(PreferencesWindow, self).__init__()
+		uic.loadUi('preferences.ui', self)
+
+	def browse(self):
+		fname = QtGui.QFileDialog.getOpenFileName(self, 'Open executable file', '.', "Executable files (*.*)")
+		self.path_cuprocell.setText(str(fname))
 
 class MainWindow(QtGui.QMainWindow):
 
@@ -108,6 +117,7 @@ class MainWindow(QtGui.QMainWindow):
 		uic.loadUi('mainwindow.ui', self)
 
 		self._about_window = AboutWindow()
+		self._preferences_window = PreferencesWindow()
 
 		self._initial_histo    = None
 		self._target_histo     = None
@@ -196,19 +206,55 @@ class MainWindow(QtGui.QMainWindow):
 		#self._load_project_from_file("./prova.prc")		
 		"""
 		self._project_filename = None
-		self._version = " 1.2.0"
+		self._version = "1.3.0"
 
 		self._update_window_title()
 
 		self._calibrator = Calibrator()
 		self._calibrator.distribution = "gauss"  # default semantics
 
-		self._load_project_from_file("../models/model3.prc")
 
+		self._config = SafeConfigParser()
+		
 		# implement in preferences (TODO)
-		self._path_to_GPU_procell = "D:\\GITHUBrepos\\cuda-pro-cell\\build\\bin\\Release\\procell.exe"
+		#self._path_to_GPU_procell = "D:\\GITHUBrepos\\cuda-pro-cell\\build\\bin\\Release\\procell.exe"
+		self._path_to_GPU_procell = None
 
+		self._open_config()
+		
+		#self._load_project_from_file("../models/model3.prc")
+
+		
 		self.show()
+
+	def closeEvent(self, event):
+		self._save_config()
+
+	def _open_config(self):
+		print " * Opening config.ini (if present)"
+
+		if not os.path.exists("config.ini"):
+			self._save_config()
+		else:
+			self._config.read('config.ini')
+			self._path_to_GPU_procell = self._config.get("main", "path_cuprocell")
+			last_project = self._config.get("main", "last_project")
+			self._load_project_from_file(last_project)
+
+	def _save_config(self):
+		self._config = SafeConfigParser()
+		self._config.add_section('main')
+		self._config.set('main', 'last_project', str(self._project_filename))
+		self._config.set('main', 'path_cuprocell', self._path_to_GPU_procell)
+		with open('config.ini', 'w') as f:
+			self._config.write(f)
+	
+
+	def _open_preferences(self):
+		if self._preferences_window.exec_() == QtGui.QDialog.Accepted:
+			self._path_to_GPU_procell = str(self._preferences_window.path_cuprocell.text())
+		print " * New path to cuProCell:", self._path_to_GPU_procell
+
 
 	def _new_project(self):
 		spawn()
@@ -799,40 +845,70 @@ class MainWindow(QtGui.QMainWindow):
 				P = pickle.load(inpt)
 			print " * Project '%s' loaded from %s" % (P.project_name, path)
 			if P is None:
-				print "ERROR parsing the project file %s" % fname
+				print "ERROR parsing the project file %s" % path
 				return
 
 			self._simulated_histo = None
 			self._validation_histo = None
+		except:
+			print "Unable to open the project file"
+			return None
 
+		try:
 			self._import_initial_histo(P.initial_file)
 			self._update_statusbar(20)
+		except:
+			print "Unable to import the initial histogram"
+			return None
+
+		try:
 			self._import_target_histo(P.target_file)
 			self._update_statusbar(40)
+		except:
+			print "Unable to import the target histogram"
+			return None
+
+		try:
 			self._import_validation_histo(P.validation_file)
 			self._update_statusbar(60)
+		except:
+			print "Unable to import the validation histogram"
+			return None
+
+		try:
 			self.projectname.setText(P.project_name)
 			self._import_populations(P.populations)
 			self._update_statusbar(70)
+		except:
+			print "Unable to import the populations"
+			return None
+
+		try:
 			self.simulationtime.setValue(P.simulation_time)
 			self.validationtime.setValue(P.simulation_validation_time)
 			self.fluorescencethreshold.setValue(P.fluorescence_threshold)
 			self.bins.setValue(P.bins)
 			self.lowerbin.setValue(P.lowest_bin)
 			self.higherbin.setValue(P.highest_bin)
+		except:
+			print "Unable to set the time, or fluorescence, or bins"
+			return None
+
+		try:
 			self.normtotarget.setChecked(P.normalize_to_target)
 			self.async.setChecked(P.asynchronous)
 			self._update_statusbar(80)
 			self.swarmsize.setValue(P.swarm_size)
 			self.iterations.setValue(P.iterations)
 			self._update_statusbar(90)
-
-			self.progress.reset()
-			self._project_filename = str(fname)
-			self._update_window_title()
 		except:
+			print "Unable to set the PE values"
 			return None
-		
+
+		self.progress.reset()
+		self._project_filename = str(path)
+		self._update_window_title()
+			
 
 		
 	def _update_statusbar(self, v):

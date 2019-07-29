@@ -1735,6 +1735,22 @@ border: 0px solid black;
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>action_Preferences</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>_open_preferences()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>587</x>
+     <y>488</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>drop_histogram()</slot>
@@ -1756,5 +1772,6 @@ border: 0px solid black;
   <slot>save_project_as()</slot>
   <slot>_show_about()</slot>
   <slot>optimize()</slot>
+  <slot>_open_preferences()</slot>
  </slots>
 </ui>
