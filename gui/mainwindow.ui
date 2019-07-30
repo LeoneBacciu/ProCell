@@ -818,6 +818,7 @@ border: 0px solid black;
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="actionCreate_new_blank_project"/>
     <addaction name="action_New_project"/>
     <addaction name="action_Open_project"/>
     <addaction name="action_Save"/>
@@ -1142,15 +1143,15 @@ border: 0px solid black;
   </widget>
   <action name="action_New_project">
    <property name="text">
-    <string>&amp;New</string>
+    <string>&amp;Duplicate project</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+N</string>
+    <string>Ctrl+D</string>
    </property>
   </action>
   <action name="action_Open_project">
    <property name="text">
-    <string>&amp;Open...</string>
+    <string>&amp;Open project...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -1158,7 +1159,7 @@ border: 0px solid black;
   </action>
   <action name="action_Save">
    <property name="text">
-    <string>&amp;Save</string>
+    <string>&amp;Save project</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -1166,7 +1167,7 @@ border: 0px solid black;
   </action>
   <action name="actionSave_as">
    <property name="text">
-    <string>Save &amp;as...</string>
+    <string>Save project &amp;as...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
@@ -1277,7 +1278,7 @@ border: 0px solid black;
     <string>Remove selected population</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+D</string>
+    <string>Ctrl+R</string>
    </property>
   </action>
   <action name="actionS_top_simulation">
@@ -1304,12 +1305,23 @@ border: 0px solid black;
     <string>Perform &amp;validation</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+V</string>
+    <string>F6</string>
    </property>
   </action>
   <action name="action_Preferences">
    <property name="text">
     <string>&amp;Preferences...</string>
+   </property>
+   <property name="shortcut">
+    <string>F10</string>
+   </property>
+  </action>
+  <action name="actionCreate_new_blank_project">
+   <property name="text">
+    <string>Create &amp;new blank project</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
  </widget>
@@ -1751,6 +1763,22 @@ border: 0px solid black;
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionCreate_new_blank_project</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>_new_blank()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>587</x>
+     <y>488</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>drop_histogram()</slot>
@@ -1773,5 +1801,6 @@ border: 0px solid black;
   <slot>_show_about()</slot>
   <slot>optimize()</slot>
   <slot>_open_preferences()</slot>
+  <slot>_new_blank()</slot>
  </slots>
 </ui>

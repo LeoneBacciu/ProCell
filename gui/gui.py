@@ -38,6 +38,9 @@ def rebin(series, lower, upper, N=1000):
 	for k,v in zip(series.T[0], series.T[1]):
 		while(k>bins[pos]):
 			pos+=1
+			if pos>=N: 
+				print "WARNING: some fluorescence levels were above the upper limit (%f)." % k
+				return res, bins
 		res[pos] += v
 	return res, bins
 
@@ -119,12 +122,6 @@ class MainWindow(QtGui.QMainWindow):
 		self._about_window = AboutWindow()
 		self._preferences_window = PreferencesWindow()
 
-		self._initial_histo    = None
-		self._target_histo     = None
-		self._validation_histo = None
-		self._simulated_histo  = None
-		self._simulated_validation_histo = None
-
 		self._initial_histo_path = None
 		self._target_histo_path = None
 		self._validation_histo_path = None
@@ -155,15 +152,8 @@ class MainWindow(QtGui.QMainWindow):
 		self.target_layout.addWidget (self._target_histo_canvas)
 		self.validation_layout.addWidget (self._validation_histo_canvas)
 
-		self._population_names 			= []
-		self._population_proportions 	= []
-		self._population_means 			= []
-		self._population_std   			= []
-		self._population_info  			= []
-		self._population_minmean 		= []
-		self._population_maxmean 		= []
-		self._population_minsd 			= []
-		self._population_maxsd 			= []
+		self._wipe_populations()
+		self._wipe_histograms()
 
 		# debug
 		"""
@@ -260,6 +250,45 @@ class MainWindow(QtGui.QMainWindow):
 		spawn()
 
 
+	def _wipe_populations(self):
+		self._population_names 			= []
+		self._population_proportions 	= []
+		self._population_means 			= []
+		self._population_std   			= []
+		self._population_info  			= []
+		self._population_minmean 		= []
+		self._population_maxmean 		= []
+		self._population_minsd 			= []
+		self._population_maxsd 			= []
+
+	def _wipe_histograms(self):
+		self._initial_histo    = None
+		self._target_histo     = None
+		self._validation_histo = None
+		self._simulated_histo  = None
+		self._simulated_validation_histo = None
+
+		#self._initial_histo_canvas    = FigureCanvas(self._initial_histo_figure)
+		#self.initial_layout.addWidget (self._initial_histo_canvas)
+		#self._target_histo_canvas     = FigureCanvas(self._target_histo_figure)
+		#self._validation_histo_canvas = FigureCanvas(self._validation_histo_figure)
+
+
+		self._update_all_plots()
+
+	def _new_blank(self):
+		self._project_filename = None
+		self.projectname.clear()
+
+		self._wipe_populations()
+		self._update_populations()
+
+		self._wipe_histograms()
+
+		print " * Project wiped out"	
+
+
+
 	def _show_about(self):
 		self._about_window.show()
 
@@ -312,7 +341,7 @@ class MainWindow(QtGui.QMainWindow):
 		path = str(path)
 		try:
 			A = loadtxt(path)
-			#print "Valid histogram found. Data:"; 		print A
+			print " * Attempting the import of the initial histogram %s" % path
 			self._initial_histo = A[:]
 			self._initial_histo_path = path
 			self._update_initial_plot()		
@@ -327,7 +356,7 @@ class MainWindow(QtGui.QMainWindow):
 		path = str(path)
 		try:
 			A = loadtxt(path)
-			#print "Valid histogram found. Data:"; 			print A
+			print " * Attempting the import of the target histogram %s" % path
 			self._target_histo = A[:]
 			self._target_histo_path = path
 			self._update_target_plot()
@@ -370,12 +399,13 @@ class MainWindow(QtGui.QMainWindow):
 		res = self._import_validation_histo(fname)
 
 	def _update_all_plots(self):
-		if self._initial_histo 		is not None:	self._update_initial_plot()
+		if self._initial_histo 		is not None: self._update_initial_plot()
 		if self._target_histo  		is not None: self._update_target_plot()
 		if self._validation_histo 	is not None: self._update_validation_plot()
 
 	def _update_target_plot(self):
 		self._target_histo_ax.cla()
+		if self._target_histo is None: return
 		#self._target_histo_ax = self._target_histo_figure.add_subplot(111)
 
 		lower = float(self.lowerbin.value())
@@ -424,7 +454,10 @@ class MainWindow(QtGui.QMainWindow):
 			self._import_initial_histo(fname)
 			
 	def _update_initial_plot(self):
-		self._initial_histo_ax.clear()
+		self._initial_histo_ax.cla()		
+		if self._initial_histo is None: 
+			self._initial_histo_canvas.draw()
+			return
 
 		lower = float(self.lowerbin.value())
 		higher = float(self.higherbin.value())
@@ -447,7 +480,8 @@ class MainWindow(QtGui.QMainWindow):
 		self._initial_histo_canvas.draw()
 
 	def _update_validation_plot(self):
-		self._validation_histo_ax.clear()
+		self._validation_histo_ax.cla()
+		if self._validation_histo is None: return
 
 		lower = float(self.lowerbin.value())
 		higher = float(self.higherbin.value())
@@ -551,14 +585,23 @@ class MainWindow(QtGui.QMainWindow):
 			else:
 				self._error_proportions()
 		else:
-			self._query_for_initial()
+			if self._initial_histo is None:
+				self._query_for_initial()
+			else:
+				self._error_populations()
 
 	def _error_proportions(self):
 		msg = QtGui.QMessageBox()
 		msg.setIcon(QtGui.QMessageBox.Critical)
 		msg.setText("The sum of proportions is not 1. Please check the proportion of cells.")
 		msg.setWindowTitle("Unable to run simulation")
-		#msg.setStandardButtons(QtGui.QMessageBox.OK)
+		ret = msg.exec_()
+
+	def _error_populations(self):
+		msg = QtGui.QMessageBox()
+		msg.setIcon(QtGui.QMessageBox.Critical)
+		msg.setText("Populations were not specified. Cell populations are necessary to run ProCell.")
+		msg.setWindowTitle("Unable to run simulation")
 		ret = msg.exec_()
 
 	def _query_for_initial(self):
