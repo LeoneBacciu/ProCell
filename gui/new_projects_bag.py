@@ -4,6 +4,6 @@ class Projects(object):
 		self._projects = []
 
 	def add(self, p):
-		if p not in self._projects:
+		if (p not in self._projects) and (p != ""):
 			self._projects.append(p)
 		return self._projects
