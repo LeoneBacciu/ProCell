@@ -823,9 +823,9 @@ border: 0px solid black;
     <addaction name="action_Open_project"/>
     <addaction name="action_Save"/>
     <addaction name="actionSave_as"/>
-    <addaction name="action_Reopen_recent"/>
     <addaction name="separator"/>
     <addaction name="actionE_xit"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">

@@ -21,6 +21,7 @@ except:
 	print "WARNING: Seaborn not installed"
 from estimator import Calibrator
 from ConfigParser import SafeConfigParser
+from new_projects_bag import Projects
 
 def dummy(): return 0
 
@@ -191,23 +192,23 @@ class MainWindow(QtGui.QMainWindow):
 		self.progress.setRange(0,100)
 		self.statusBar.addPermanentWidget(self.progress)
 
+		# recent menu
+		self._recentmenus = self.menu_File.addMenu("&Reopen recent project")
+
 		"""
 		# project stuff
 		#self._load_project_from_file("./prova.prc")		
 		"""
 		self._project_filename = None
-		self._version = "1.3.0"
+		self._version = "1.5.0"
 
 		self._update_window_title()
 
 		self._calibrator = Calibrator()
 		self._calibrator.distribution = "gauss"  # default semantics
 
-
+		self._recent_projects = Projects()
 		self._config = SafeConfigParser()
-		
-		# implement in preferences (TODO)
-		#self._path_to_GPU_procell = "D:\\GITHUBrepos\\cuda-pro-cell\\build\\bin\\Release\\procell.exe"
 		self._path_to_GPU_procell = None
 
 		self._open_config()
@@ -229,13 +230,58 @@ class MainWindow(QtGui.QMainWindow):
 			self._config.read('config.ini')
 			self._path_to_GPU_procell = self._config.get("main", "path_cuprocell")
 			last_project = self._config.get("main", "last_project")
+
+			for x in xrange(10):
+				ppath = self._config.get("recent", "proj%d" % (x+1))
+				self._recent_projects.add(ppath)
+			#print self._recent_projects
+			self._populate_last_projects()
+
+
 			self._load_project_from_file(last_project)
+
+
+	def _load_old_project(self, n):
+		self._load_project_from_file(self._recent_projects._projects[n])
+
+
+	def _populate_last_projects(self):
+		self._recentmenus.clear()
+		actions = []
+		for n,x in enumerate(self._recent_projects._projects):
+			if x!="":
+				actions.append( self._recentmenus.addAction(x) )
+				if n==0: actions[-1].triggered.connect(lambda: self._load_old_project(0))
+				if n==1: actions[-1].triggered.connect(lambda: self._load_old_project(1))
+				if n==2: actions[-1].triggered.connect(lambda: self._load_old_project(2))
+				if n==3: actions[-1].triggered.connect(lambda: self._load_old_project(3))
+				if n==4: actions[-1].triggered.connect(lambda: self._load_old_project(4))
+				if n==5: actions[-1].triggered.connect(lambda: self._load_old_project(5))
+				if n==6: actions[-1].triggered.connect(lambda: self._load_old_project(6))
+				if n==7: actions[-1].triggered.connect(lambda: self._load_old_project(7))
+				if n==8: actions[-1].triggered.connect(lambda: self._load_old_project(8))
+				if n==9: actions[-1].triggered.connect(lambda: self._load_old_project(9))
+
+
 
 	def _save_config(self):
 		self._config = SafeConfigParser()
+		
+		# main section
 		self._config.add_section('main')
 		self._config.set('main', 'last_project', str(self._project_filename))
 		self._config.set('main', 'path_cuprocell', self._path_to_GPU_procell)
+		
+		# recent projects
+		self._config.add_section('recent')
+		projects = self._recent_projects._projects[-10:]
+		for n in xrange(10):
+			try:
+				pname = projects[n]
+				self._config.set('recent', 'proj%d' % (n+1), pname)
+			except:
+				self._config.set('recent', 'proj%d' % (n+1), "")
+		
 		with open('config.ini', 'w') as f:
 			self._config.write(f)
 	
@@ -898,21 +944,24 @@ class MainWindow(QtGui.QMainWindow):
 			return None
 
 		try:
-			self._import_initial_histo(P.initial_file)
+			if P.initial_file is not None:
+				self._import_initial_histo(P.initial_file)
 			self._update_statusbar(20)
 		except:
 			print "Unable to import the initial histogram"
 			return None
 
 		try:
-			self._import_target_histo(P.target_file)
+			if P.target_file is not None:
+				self._import_target_histo(P.target_file)
 			self._update_statusbar(40)
 		except:
 			print "Unable to import the target histogram"
 			return None
 
 		try:
-			self._import_validation_histo(P.validation_file)
+			if P.validation_file is not None:
+				self._import_validation_histo(P.validation_file)
 			self._update_statusbar(60)
 		except:
 			print "Unable to import the validation histogram"
@@ -950,6 +999,8 @@ class MainWindow(QtGui.QMainWindow):
 
 		self.progress.reset()
 		self._project_filename = str(path)
+		self._recent_projects.add(self._project_filename)
+		self._populate_last_projects()
 		self._update_window_title()
 			
 
