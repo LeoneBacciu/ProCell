@@ -222,22 +222,25 @@ class MainWindow(QtGui.QMainWindow):
 		self._save_config()
 
 	def _open_config(self):
-		print " * Opening config.ini (if present)"
+		print " * Opening last configuration"
 
 		if not os.path.exists("config.ini"):
 			self._save_config()
 		else:
-			self._config.read('config.ini')
-			self._path_to_GPU_procell = self._config.get("main", "path_cuprocell")
-			last_project = self._config.get("main", "last_project")
+			try:
+				self._config.read('config.ini')
 
-			for x in xrange(10):
-				ppath = self._config.get("recent", "proj%d" % (x+1))
-				self._recent_projects.add(ppath)
-			#print self._recent_projects
+				self._path_to_GPU_procell = self._config.get("main", "path_cuprocell")
+				last_project = self._config.get("main", "last_project")
+
+				for x in xrange(10):
+					ppath = self._config.get("recent", "proj%d" % (x+1))
+					self._recent_projects.add(ppath)
+			except:
+				print "WARNING: config.ini seems to be corrupt, rebuilding..."
+				self._save_config()
+
 			self._populate_last_projects()
-
-
 			self._load_project_from_file(last_project)
 
 
@@ -269,8 +272,14 @@ class MainWindow(QtGui.QMainWindow):
 		
 		# main section
 		self._config.add_section('main')
-		self._config.set('main', 'last_project', str(self._project_filename))
-		self._config.set('main', 'path_cuprocell', self._path_to_GPU_procell)
+		if self._project_filename is None:
+			self._config.set('main', 'last_project', "")
+		else:
+			self._config.set('main', 'last_project', str(self._project_filename))
+		if self._path_to_GPU_procell is None:
+			self._config.set('main', 'path_cuprocell', "")
+		else:
+			self._config.set('main', 'path_cuprocell', str(self._path_to_GPU_procell))
 		
 		# recent projects
 		self._config.add_section('recent')
