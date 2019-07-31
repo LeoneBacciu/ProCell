@@ -19,9 +19,9 @@ def _prepare_files_for_GPU(names, prop, mean, st):
 	# proportion [space] mean [space] std
 	with open("__temporary__", "w") as fo:
 		for name in names:
-			fo.write(str(prop[name])+" ")
-			fo.write(str(mean[name])+" ")
-			fo.write(str(st[name])+"\n")
+			row = "%s %s %s\n" % (prop[name], mean[name], st[name])
+			fo.write(row)
+	
 
 def _launch_GPU_simulation(executable, initial_histo, model_file, time_max, PHI, names):
 
@@ -110,6 +110,12 @@ def fitness_evaluate(CP, TGT, N=1000, draw=False):
 
 def fitness_gui(p, arguments, return_dictionaries=False):
 
+	gui = arguments['form']
+	names = gui._population_names
+	N = len(names)
+
+	use_gpu = (gui._path_to_GPU_procell is not None)
+
 	def rel2abs_prob(V):
 		putative_proportions = [V[0]]
 		consumed = V[0]
@@ -123,10 +129,6 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 		putative_proportions.append(1.-consumed)
 		return putative_proportions
 
-	gui = arguments['form']
-	names = gui._population_names
-	N = len(names)
-
 	putative_proportions = rel2abs_prob(p[0:N-1])
 	proportions = dict(zip(names, putative_proportions))
 
@@ -137,7 +139,10 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 			putative_means.append(p[pos])
 			pos+=1
 		else:
-			putative_means.append(sys.float_info.max)
+			if use_gpu:
+				putative_means.append(-1)  # used by CPU version
+			else:
+				putative_means.append(sys.float_info.max)  # used by CPU version
 
 	mean_div      = dict(zip(names, putative_means))
 
@@ -147,11 +152,12 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 			putative_std.append(p[pos])
 			pos+=1
 		else:
-			putative_std.append(0)
+			if use_gpu:
+				putative_std.append(-1)
+			else:
+				putative_std.append(0)						# used by CPU version
 
 	std_div       = dict(zip(names, putative_std))	
-
-	Sim = Simulator()
 
 	print "Testing the following parameterization:"
 	print " - Proportions:", proportions
@@ -166,17 +172,8 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 	PHI      = float(gui.fluorescencethreshold.value())
 
 	if gui._path_to_GPU_procell is not None:
-		#print " * Launching GPU-powered simulation"
-		#print "   preparing files...", 
 
-		fixed_means = map(lambda x: x if isinstance(x, float) else -1., gui._population_means)
-		fixed_std   = map(lambda x: x if isinstance(x, float) else -1., gui._population_std)
-		
-		proportions 	= dict(zip(gui._population_names, gui._population_proportions))
-		means 			= dict(zip(gui._population_names, fixed_means))
-		stdev 			= dict(zip(gui._population_names, fixed_std))
-
-		_prepare_files_for_GPU(gui._population_names, proportions, means, stdev)
+		_prepare_files_for_GPU(names, proportions, mean_div, std_div)
 
 		try:
 			result_simulation, result_simulation_types = _launch_GPU_simulation(
@@ -193,6 +190,9 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 		#print "done"
 
 	else: 
+
+		Sim = Simulator()
+
 		result_simulation, result_simulation_types = Sim.simulate(
 				path=gui._initial_histo_path, 
 				types=names, 
