@@ -1136,7 +1136,8 @@ class OptimizationThread(QThread):
 					swarm_size=int(self._parent.swarmsize.value()),
 					search_space=search_space,
 					form=self._parent,
-					repetition=rep
+					repetition=rep,
+					loginit=self._parent.logarithmic.isChecked()
 				)
 
 		#print self._solution_optimization, self._fitness_solution_optimization

@@ -451,7 +451,7 @@ class Calibrator(object):
 
 
 	def calibrate_gui(self, repetition=0, max_iter=10, search_space=None, 
-		swarm_size=50, form=None, append_time_stamp=False):
+		swarm_size=50, form=None, append_time_stamp=False, loginit=False):
 
 		# controls
 		if self._types == []: 		raise Exception("Types of cells not specified")
@@ -476,8 +476,13 @@ class Calibrator(object):
 		FP.set_swarm_size(swarm_size)
 
 		FP.disable_fuzzyrule_minvelocity()
+
+		if loginit:
+			logtype = 'logarithmic'
+		else:
+			logtype = 'uniform'
 		
-		return FP.solve_with_fstpso(creation_method={'name': 'uniform'}, 			
+		return FP.solve_with_fstpso(creation_method={'name': logtype}, 			
 			max_iter=max_iter, 
 			dump_best_fitness=FP.dump_fitness, 
 			dump_best_solution=FP.dump_struct
