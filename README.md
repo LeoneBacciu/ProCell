@@ -31,4 +31,4 @@ If you need additional information about ProCell please write to: nobile@disco.u
 
 Nobile M.S., Vlachou T., Spolaor S., Bossi D., Cazzaniga P., Lanfrancone L., Mauri G., Pelicci P.G., Besozzi D.: Modeling cell proliferation in human acute myeloid leukemia xenografts, Bioinformatics, 2019 (in press)
 
-Nobile M.S., Vlachou T., Spolaor S., Cazzaniga P., Mauri G., Pelicci P.G., Besozzi D.: ProCell: Investigating cell proliferation with Swarm Intelligence, 16th IEEE International Conference on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB 2019), Certosa di Pontignano, Siena, Tuscany, Italy, 2019 (in press)
+Nobile M.S., Vlachou T., Spolaor S., Cazzaniga P., Mauri G., Pelicci P.G., Besozzi D.: ProCell: Investigating cell proliferation with Swarm Intelligence, Proceedings of the 16th IEEE International Conference on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB 2019), Certosa di Pontignano, Siena, Tuscany, Italy, 2019 
