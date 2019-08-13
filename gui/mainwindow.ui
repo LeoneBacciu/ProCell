@@ -141,6 +141,16 @@ border: 0px solid black;
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="validate_pop_button">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="text">
+                 <string>Validate population</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
@@ -825,6 +835,16 @@ border: 0px solid black;
            </property>
            <property name="default">
             <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="checkBox">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Force CPU simulation (slower)</string>
            </property>
           </widget>
          </item>
@@ -1824,6 +1844,22 @@ border: 0px solid black;
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>validate_pop_button</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>_validate_model()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>961</x>
+     <y>122</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>587</x>
+     <y>488</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>drop_histogram()</slot>
@@ -1849,5 +1885,6 @@ border: 0px solid black;
   <slot>_new_blank()</slot>
   <slot>click_normalize()</slot>
   <slot>_remove_population()</slot>
+  <slot>_validate_model()</slot>
  </slots>
 </ui>

@@ -42,7 +42,7 @@ def rebin(series, lower, upper, N=1000):
 	for k,v in zip(series.T[0], series.T[1]):
 		if k<lower:
 			if v>0: 
-				print ("%f is lower than %f, and has frequency %d" % (k,lower,v))
+				#print ("%f is lower than %f, and has frequency %d" % (k,lower,v))
 				continue
 		while(k>bins[pos]):
 			pos+=1
@@ -105,11 +105,11 @@ class PandasModel(QtCore.QAbstractTableModel):
 	def flags(self, index):
 		return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable #| QtCore.Qt.ItemIsEditable
 
-class AboutWindow(QtGui.QDialog):
+class AboutWindow(QtGui.QMainWindow):
 
 	def __init__(self):
 		super(AboutWindow, self).__init__()
-		uic.loadUi('about.ui', self)
+		uic.loadUi('about2.ui', self)
 		
 class PreferencesWindow(QtGui.QDialog):
 
@@ -227,7 +227,9 @@ class MainWindow(QtGui.QMainWindow):
 			try:
 				self._config.read('config.ini')
 
-				self._path_to_GPU_procell = self._config.get("main", "path_cuprocell")
+				ptp = self._config.get("main", "path_cuprocell")
+				if ptp.strip()=="": ptp = None
+				self._path_to_GPU_procell = ptp
 				last_project = self._config.get("main", "last_project")
 
 				for x in xrange(10):
@@ -616,6 +618,10 @@ class MainWindow(QtGui.QMainWindow):
 			self._initial_histo_figure.savefig(file+os.sep+"initial_histogram.pdf", figsize=(10,7), dpi=300)
 			self._target_histo_figure.savefig(file+os.sep+"target_histogram.pdf", figsize=(10,7), dpi=300)
 			self._validation_histo_figure.savefig(file+os.sep+"validation_histogram.pdf", figsize=(10,7), dpi=300)
+
+
+	def _validate_model(self):
+		pass
 
 
 	def _ready_to_simulate(self):
