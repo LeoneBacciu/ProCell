@@ -1434,7 +1434,7 @@ border: 0px solid black;
    <sender>normtotarget</sender>
    <signal>stateChanged(int)</signal>
    <receiver>MainWindow</receiver>
-   <slot>_update_target_plot()</slot>
+   <slot>click_normalize()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>365</x>
@@ -1805,5 +1805,6 @@ border: 0px solid black;
   <slot>optimize()</slot>
   <slot>_open_preferences()</slot>
   <slot>_new_blank()</slot>
+  <slot>click_normalize()</slot>
  </slots>
 </ui>

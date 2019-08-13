@@ -453,15 +453,20 @@ class MainWindow(QtGui.QMainWindow):
 		# import file
 		res = self._import_validation_histo(fname)
 
+
 	def _update_all_plots(self):
 		if self._initial_histo 		is not None: self._update_initial_plot()
 		if self._target_histo  		is not None: self._update_target_plot()
 		if self._validation_histo 	is not None: self._update_validation_plot()
 
-	def _update_target_plot(self):
+
+	def click_normalize(self):
+		self._update_all_plots()
+
+
+	def _update_target_plot(self, skip=0):
 		self._target_histo_ax.cla()
 		if self._target_histo is None: return
-		#self._target_histo_ax = self._target_histo_figure.add_subplot(111)
 
 		lower = float(self.lowerbin.value())
 		higher = float(self.higherbin.value())
@@ -474,8 +479,7 @@ class MainWindow(QtGui.QMainWindow):
 
 		if self._target_histo is not None:
 			res, bins = rebin(self._target_histo, lower, higher, N=calcbins)
-			self._target_histo_ax.bar(bins[1:-1], res[1:-1], width=diff(bins[1:]),  color=selected_color, label="Target", alpha=0.5, ec="black", linewidth=0.4, align="edge")
-			#print " * Integral of target:", sum(res)
+			self._target_histo_ax.bar(bins[skip:-1], res[skip:-1], width=diff(bins[skip:]),  color=selected_color, label="Target", alpha=0.5, ec="black", linewidth=0.4, align="edge")
 
 		if self.usecolors.isChecked():
 			selected_color = "green"
@@ -489,8 +493,10 @@ class MainWindow(QtGui.QMainWindow):
 			else:
 				ratio = 1.0
 
+			print " * Calculated ratio for target:", ratio
+
 			self.hellingertarget.setText( "%.3f"  % hellinger1(res2/ratio, res) )
-			self._target_histo_ax.bar(bins2[1:-1], res2[1:-1]/ratio, width=diff(bins[1:]),  color=selected_color, label="Simulation", alpha=0.5, ec="black", linewidth=0.4, align="edge")
+			self._target_histo_ax.bar(bins2[skip:-1], res2[skip:-1]/ratio, width=diff(bins[skip:]),  color=selected_color, label="Simulation", alpha=0.5, ec="black", linewidth=0.4, align="edge")
 
 		self._target_histo_ax.set_xscale("symlog")
 		self._target_histo_ax.set_xlim(bins[0],bins[-1])
@@ -498,6 +504,73 @@ class MainWindow(QtGui.QMainWindow):
 		self._target_histo_ax.set_xlabel("Fluorescence")
 		self._target_histo_ax.set_ylabel("Cells frequency")
 		self._target_histo_canvas.draw()
+
+
+
+
+	def _update_validation_plot(self, skip=0):
+		self._validation_histo_ax.cla()
+		if self._validation_histo is None: return
+
+		lower = float(self.lowerbin.value())
+		higher = float(self.higherbin.value())
+		calcbins = int(self.bins.value())
+		
+		if self.usecolors.isChecked():
+			selected_color = "purple"
+		else:
+			selected_color = "gray"
+				
+		if self._validation_histo is not None:
+			res, bins = rebin(self._validation_histo, lower, higher, N=calcbins)
+			self._validation_histo_ax.bar(bins[skip:-1], res[skip:-1], width=diff(bins[skip:]),  color=selected_color, label="Validation histogram", alpha=0.5, linewidth=0.4, ec="black", align="edge")
+
+		if self.usecolors.isChecked():
+			selected_color = "green"
+		else:
+			selected_color = "black"
+
+		if self._simulated_validation_histo is not None:
+			res2, bins2 = rebin(self._simulated_validation_histo, lower, higher, N=calcbins)
+			if self.normtotarget.isChecked():
+				ratio = 1.*sum(res2)/sum(res)
+			else:
+				ratio = 1.0
+
+			print " * Calculated ratio for validation:", ratio
+			print sum(res2)
+			print sum(res)
+			print sum(res2[1:-1]/ratio)
+
+			self.hellingervalidation.setText( "%.3f"  % hellinger1(res2/ratio, res) )
+			self._validation_histo_ax.bar(bins2[skip:-1], res2[skip:-1]/ratio, width=diff(bins[skip:]),  color=selected_color, label="Simulation", alpha=0.5, ec="black", linewidth=0.4, align="edge")
+
+		self._validation_histo_ax.set_xscale("symlog")
+		self._validation_histo_ax.set_xlim(bins[0],bins[-1])
+		self._validation_histo_figure.legend(framealpha=1.)
+		self._validation_histo_ax.set_xlabel("Fluorescence")
+		self._validation_histo_ax.set_ylabel("Cells frequency")
+		self._validation_histo_canvas.draw()
+
+	def new_population(self):
+		self._add_population("unnamed population", proportion=0, mean=0,  st=0, minimum_mean=0, maximum_mean=0, minimum_sd=0, maximum_sd=0, info="")
+		self._update_populations()	
+
+	def remove_population(self):
+		index = self.populations_table.selectionModel().selectedRows()[0]
+		row = index.row()
+		print " * Removing row %d..." % row
+		del self._population_names[row]
+		del self._population_proportions[row]
+		del self._population_means[row]
+		del self._population_std[row]
+		del self._population_minmean[row]
+		del self._population_maxmean[row]
+		del self._population_minsd[row]
+		del self._population_maxsd[row]
+		del self._population_info[row]
+		self._update_populations()
+		verticalResizeTableViewToContents(self.populations_table)
 
 
 	def import_initial_histo(self):
@@ -534,60 +607,6 @@ class MainWindow(QtGui.QMainWindow):
 		self._initial_histo_figure.legend(framealpha=1.)
 		self._initial_histo_canvas.draw()
 
-	def _update_validation_plot(self):
-		self._validation_histo_ax.cla()
-		if self._validation_histo is None: return
-
-		lower = float(self.lowerbin.value())
-		higher = float(self.higherbin.value())
-		calcbins = int(self.bins.value())
-		
-		res, bins = rebin(self._validation_histo, lower, higher, N=calcbins)
-
-		self._validation_histo_ax.set_xlabel("Fluorescence")
-		self._validation_histo_ax.set_ylabel("Cells frequency")
-
-		if self.usecolors.isChecked():
-			selected_color = "purple"
-		else:
-			selected_color = "gray"
-				
-		self._validation_histo_ax.bar(bins[1:-1], res[1:-1], width=diff(bins[1:]),  color=selected_color, label="Validation histogram", alpha=0.5, linewidth=0.4, ec="black", align="edge")
-
-		if self._simulated_validation_histo is not None:
-			res2, bins2 = rebin(self._simulated_validation_histo, lower, higher, N=calcbins)
-			if self.normtotarget.isChecked():
-				ratio = 1.*sum(res2)/sum(res)
-			else:
-				ratio = 1.0
-
-			self.hellingervalidation.setText( "%.3f"  % hellinger1(res2/ratio, res) )
-			self._validation_histo_ax.bar(bins2[1:-1], res2[1:-1]/ratio, width=diff(bins[1:]),  color="green", label="Simulation", alpha=0.5, ec="black", linewidth=0.4, align="edge")
-
-		self._validation_histo_ax.set_xscale("symlog")
-		self._validation_histo_ax.set_xlim(bins[0],bins[-1])
-		self._validation_histo_figure.legend(framealpha=1.)
-		self._validation_histo_canvas.draw()
-
-	def new_population(self):
-		self._add_population("unnamed population", proportion=0, mean=0,  st=0, minimum_mean=0, maximum_mean=0, minimum_sd=0, maximum_sd=0, info="")
-		self._update_populations()	
-
-	def remove_population(self):
-		index = self.populations_table.selectionModel().selectedRows()[0]
-		row = index.row()
-		print " * Removing row %d..." % row
-		del self._population_names[row]
-		del self._population_proportions[row]
-		del self._population_means[row]
-		del self._population_std[row]
-		del self._population_minmean[row]
-		del self._population_maxmean[row]
-		del self._population_minsd[row]
-		del self._population_maxsd[row]
-		del self._population_info[row]
-		self._update_populations()
-		verticalResizeTableViewToContents(self.populations_table)
 
 
 	def _create_new_population_interface(self):
