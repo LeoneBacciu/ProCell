@@ -1,3 +1,4 @@
+from __future__ import print_function
 from numpy import loadtxt, array
 from random import random
 from numpy.random import normal, gamma
@@ -56,13 +57,13 @@ class Stack(object):
 
 
 		if abs(sum(proportions.values())-1)>1e-6:
-			print "ERROR: proportions do not sum to 1 (%f)" % ( sum(proportions.values()) )
+			print ("ERROR: proportions do not sum to 1 (%f)" % ( sum(proportions.values()) ))
 			exit()
 		if types==None:
-			print "ERROR: specify cell types"
+			print ("ERROR: specify cell types")
 			exit()
 		if len(types)==0:
-			print "ERROR: specify cell types"
+			print ("ERROR: specify cell types")
 			exit()
 		self.types = types
 		for fluo, freq in H0:
@@ -93,7 +94,7 @@ class Stack(object):
 							cell.t = gamma(cell.div_mean, cell.div_std) * random()
 
 				self._stack.append(cell)
-		if verbose: print self._stack
+		if verbose: print (self._stack)
 
 
 	def __repr__(self):
@@ -112,7 +113,7 @@ class Stack(object):
 			if v>0:
 				return histo[n:]
 			n+=1
-		print "ERROR: histogram empty"
+		print ("ERROR: histogram empty")
 		exit()
 
 

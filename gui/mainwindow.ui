@@ -191,7 +191,7 @@ border: 0px solid black;
            </property>
            <layout class="QGridLayout" name="gridLayout_5">
             <item row="6" column="4">
-             <widget class="QCheckBox" name="async">
+             <widget class="QCheckBox" name="asyncr">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -232,6 +232,9 @@ border: 0px solid black;
                 <height>16777215</height>
                </size>
               </property>
+              <property name="locale">
+               <locale language="English" country="UnitedKingdom"/>
+              </property>
               <property name="maximum">
                <double>100000.000000000000000</double>
               </property>
@@ -256,6 +259,9 @@ border: 0px solid black;
                 <width>100</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="locale">
+               <locale language="English" country="UnitedKingdom"/>
               </property>
               <property name="maximum">
                <double>10000.000000000000000</double>
@@ -356,6 +362,9 @@ border: 0px solid black;
                 <height>16777215</height>
                </size>
               </property>
+              <property name="locale">
+               <locale language="English" country="UnitedKingdom"/>
+              </property>
               <property name="maximum">
                <double>100000.000000000000000</double>
               </property>
@@ -381,6 +390,9 @@ border: 0px solid black;
                 <height>16777215</height>
                </size>
               </property>
+              <property name="locale">
+               <locale language="English" country="UnitedKingdom"/>
+              </property>
               <property name="maximum">
                <double>1000000.000000000000000</double>
               </property>
@@ -402,6 +414,9 @@ border: 0px solid black;
                 <width>100</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="locale">
+               <locale language="English" country="UnitedKingdom"/>
               </property>
               <property name="maximum">
                <double>1000.000000000000000</double>
@@ -814,7 +829,7 @@ border: 0px solid black;
      <x>0</x>
      <y>0</y>
      <width>1176</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -1339,7 +1354,7 @@ border: 0px solid black;
   <tabstop>lowerbin</tabstop>
   <tabstop>higherbin</tabstop>
   <tabstop>normtotarget</tabstop>
-  <tabstop>async</tabstop>
+  <tabstop>asyncr</tabstop>
   <tabstop>comboBox</tabstop>
   <tabstop>swarmsize</tabstop>
   <tabstop>iterations</tabstop>

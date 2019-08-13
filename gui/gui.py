@@ -1,3 +1,6 @@
+from __future__ import print_function
+import sip
+sip.setapi('QVariant', 2)
 import pickle, os
 from PyQt4 import QtGui, QtCore, uic
 import sys
@@ -18,7 +21,7 @@ from PyQt4.QtGui import QApplication
 try:
 	import seaborn as sns  
 except:
-	print "WARNING: Seaborn not installed"
+	print ("WARNING: Seaborn not installed")
 from estimator import Calibrator
 from ConfigParser import SafeConfigParser
 from new_projects_bag import Projects
@@ -40,47 +43,47 @@ def rebin(series, lower, upper, N=1000):
 		while(k>bins[pos]):
 			pos+=1
 			if pos>=N: 
-				print "WARNING: some fluorescence levels were above the upper limit (%f)." % k
+				print ("WARNING: some fluorescence levels were above the upper limit (%f)." % k)
 				return res, bins
 		res[pos] += v
 	return res, bins
 
 def verticalResizeTableViewToContents(tableView):
-    count=tableView.verticalHeader().count()
-    scrollBarHeight=tableView.horizontalScrollBar().height()
-    horizontalHeaderHeight=tableView.horizontalHeader().height()
-    rowTotalHeight = 0
-    for i in xrange(count):
-        rowTotalHeight+=tableView.verticalHeader().sectionSize(i)
-    tableView.setMinimumHeight(horizontalHeaderHeight+rowTotalHeight+scrollBarHeight)
+	count=tableView.verticalHeader().count()
+	scrollBarHeight=tableView.horizontalScrollBar().height()
+	horizontalHeaderHeight=tableView.horizontalHeader().height()
+	rowTotalHeight = 0
+	for i in xrange(count):
+		rowTotalHeight+=tableView.verticalHeader().sectionSize(i)
+	tableView.setMinimumHeight(horizontalHeaderHeight+rowTotalHeight+scrollBarHeight)
 
 
 class PandasModel(QtCore.QAbstractTableModel):
-    """
-    Class to populate a table view with a pandas dataframe
-    """
-    def __init__(self, data, parent=None):
-        QtCore.QAbstractTableModel.__init__(self, parent)
-        self._data = data
+	"""
+	Class to populate a table view with a pandas dataframe
+	"""
+	def __init__(self, data, parent=None):
+		QtCore.QAbstractTableModel.__init__(self, parent)
+		self._data = data
 
-    def rowCount(self, parent=None):
-        return len(self._data.values)
+	def rowCount(self, parent=None):
+		return len(self._data.values)
 
-    def columnCount(self, parent=None):
-        return self._data.columns.size
+	def columnCount(self, parent=None):
+		return self._data.columns.size
 
-    def data(self, index, role=QtCore.Qt.DisplayRole):
-        if index.isValid():
-            if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-                return str(self._data.values[index.row()][index.column()])
-        return None
+	def data(self, index, role=QtCore.Qt.DisplayRole):
+		if index.isValid():
+			if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
+				return str(self._data.values[index.row()][index.column()])
+		return None
 
-    def headerData(self, col, orientation, role):
-        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
-            return self._data.columns[col]
-        return None
+	def headerData(self, col, orientation, role):
+		if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+			return self._data.columns[col]
+		return None
 
- 	def sort(self, column, order):
+	def sort(self, column, order):
 		colname = self._df.columns.tolist()[column]
 		self.layoutAboutToBeChanged.emit()
 		self._df.sort_values(colname, ascending= order == QtCore.Qt.AscendingOrder, inplace=True)
@@ -96,7 +99,7 @@ class PandasModel(QtCore.QAbstractTableModel):
 		return False
 
 	def flags(self, index):
-		return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
+		return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable #| QtCore.Qt.ItemIsEditable
 
 class AboutWindow(QtGui.QDialog):
 
@@ -127,16 +130,16 @@ class MainWindow(QtGui.QMainWindow):
 		self._target_histo_path = None
 		self._validation_histo_path = None
 
-		self._initial_histo_figure    = plt.figure(figsize=(10,7), tight_layout=True)
-		self._target_histo_figure     = plt.figure(figsize=(10,7), tight_layout=True)
+		self._initial_histo_figure	= plt.figure(figsize=(10,7), tight_layout=True)
+		self._target_histo_figure	 = plt.figure(figsize=(10,7), tight_layout=True)
 		self._validation_histo_figure = plt.figure(figsize=(10,7), tight_layout=True)
 
-		self._initial_histo_ax    = self._initial_histo_figure.add_subplot(111)
-		self._target_histo_ax     = self._target_histo_figure.add_subplot(111)
+		self._initial_histo_ax	= self._initial_histo_figure.add_subplot(111)
+		self._target_histo_ax	 = self._target_histo_figure.add_subplot(111)
 		self._validation_histo_ax = self._validation_histo_figure.add_subplot(111)
 
-		self._initial_histo_canvas    = FigureCanvas(self._initial_histo_figure)
-		self._target_histo_canvas     = FigureCanvas(self._target_histo_figure)
+		self._initial_histo_canvas	  = FigureCanvas(self._initial_histo_figure)
+		self._target_histo_canvas	  = FigureCanvas(self._target_histo_figure)
 		self._validation_histo_canvas = FigureCanvas(self._validation_histo_figure)
 	
 		self._initial_histo_canvas.setStyleSheet("background:transparent;"); self._initial_histo_figure.set_facecolor("#ffff0000")
@@ -149,24 +152,12 @@ class MainWindow(QtGui.QMainWindow):
 		self._initial_histo_ax.set_xlabel("Fluorescence")
 		self._initial_histo_ax.set_ylabel("Cells frequency")
 
-		self.initial_layout.addWidget (self._initial_histo_canvas)
-		self.target_layout.addWidget (self._target_histo_canvas)
-		self.validation_layout.addWidget (self._validation_histo_canvas)
+		self.initial_layout.addWidget(self._initial_histo_canvas)
+		self.target_layout.addWidget(self._target_histo_canvas)
+		self.validation_layout.addWidget(self._validation_histo_canvas)
 
 		self._wipe_populations()
 		self._wipe_histograms()
-
-		# debug
-		"""
-		if len(sys.argv)<2:
-			self._add_population("quiescent", proportion=0.06, mean="-", st="-")
-			self._add_population("slowly proliferating", 0.47, mean=63.7, st=28.9)
-			self._add_population("fast proliferating", 0.47, mean=41.1, st=14.3)
-			self._import_initial_histo("C:\\AML9_Exp3_t10d_UT1_BM_GFPpos.txt")
-			self._import_target_histo("C:\\AML9_Exp3_t10d_DOX3_BM_GFPpos.txt")
-			self._import_validation_histo("C:\\AML9_Exp3_t21d_DOX_BM_GFPpos.txt")
-		"""
-
 
 		self._update_populations()
 		self.populations_table.setColumnWidth(0, 160) # name
@@ -218,11 +209,13 @@ class MainWindow(QtGui.QMainWindow):
 		
 		self.show()
 
+
 	def closeEvent(self, event):
 		self._save_config()
 
+
 	def _open_config(self):
-		print " * Opening last configuration"
+		print (" * Opening last configuration")
 
 		if not os.path.exists("config.ini"):
 			self._save_config()
@@ -237,7 +230,7 @@ class MainWindow(QtGui.QMainWindow):
 					ppath = self._config.get("recent", "proj%d" % (x+1))
 					self._recent_projects.add(ppath)
 			except:
-				print "WARNING: config.ini seems to be corrupt, rebuilding..."
+				print ("WARNING: config.ini seems to be corrupt, rebuilding...")
 				self._save_config()
 
 			self._populate_last_projects()
@@ -298,7 +291,7 @@ class MainWindow(QtGui.QMainWindow):
 	def _open_preferences(self):
 		if self._preferences_window.exec_() == QtGui.QDialog.Accepted:
 			self._path_to_GPU_procell = str(self._preferences_window.path_cuprocell.text())
-		print " * New path to cuProCell:", self._path_to_GPU_procell
+		print (" * New path to cuProCell:", self._path_to_GPU_procell)
 
 
 	def _new_project(self):
@@ -317,15 +310,15 @@ class MainWindow(QtGui.QMainWindow):
 		self._population_maxsd 			= []
 
 	def _wipe_histograms(self):
-		self._initial_histo    = None
-		self._target_histo     = None
+		self._initial_histo	= None
+		self._target_histo	 = None
 		self._validation_histo = None
 		self._simulated_histo  = None
 		self._simulated_validation_histo = None
 
-		#self._initial_histo_canvas    = FigureCanvas(self._initial_histo_figure)
+		#self._initial_histo_canvas	= FigureCanvas(self._initial_histo_figure)
 		#self.initial_layout.addWidget (self._initial_histo_canvas)
-		#self._target_histo_canvas     = FigureCanvas(self._target_histo_figure)
+		#self._target_histo_canvas	 = FigureCanvas(self._target_histo_figure)
 		#self._validation_histo_canvas = FigureCanvas(self._validation_histo_figure)
 
 
@@ -340,7 +333,7 @@ class MainWindow(QtGui.QMainWindow):
 
 		self._wipe_histograms()
 
-		print " * Project wiped out"	
+		print (" * Project wiped out")
 
 
 
@@ -379,7 +372,7 @@ class MainWindow(QtGui.QMainWindow):
 						)
 
 	def drop_histogram(self):
-		print "NOT IMPLEMENTED YET"
+		print ("NOT IMPLEMENTED YET")
 
 	def _message_error(self, text, additional=None):
 		msg = QtGui.QMessageBox()
@@ -396,7 +389,7 @@ class MainWindow(QtGui.QMainWindow):
 		path = str(path)
 		try:
 			A = loadtxt(path)
-			print " * Attempting the import of the initial histogram %s" % path
+			print (" * Attempting the import of the initial histogram %s" % path)
 			self._initial_histo = A[:]
 			self._initial_histo_path = path
 			self._update_initial_plot()		
@@ -411,7 +404,7 @@ class MainWindow(QtGui.QMainWindow):
 		path = str(path)
 		try:
 			A = loadtxt(path)
-			print " * Attempting the import of the target histogram %s" % path
+			print (" * Attempting the import of the target histogram %s" % path)
 			self._target_histo = A[:]
 			self._target_histo_path = path
 			self._update_target_plot()
@@ -445,6 +438,7 @@ class MainWindow(QtGui.QMainWindow):
 
 		# import file
 		res = self._import_target_histo(fname)
+
 
 	def import_validation_histo(self):
 		# open dialog
@@ -493,7 +487,7 @@ class MainWindow(QtGui.QMainWindow):
 			else:
 				ratio = 1.0
 
-			print " * Calculated ratio for target:", ratio
+			print (" * Calculated ratio for target:", ratio)
 
 			self.hellingertarget.setText( "%.3f"  % hellinger1(res2/ratio, res) )
 			self._target_histo_ax.bar(bins2[skip:-1], res2[skip:-1]/ratio, width=diff(bins[skip:]),  color=selected_color, label="Simulation", alpha=0.5, ec="black", linewidth=0.4, align="edge")
@@ -504,8 +498,6 @@ class MainWindow(QtGui.QMainWindow):
 		self._target_histo_ax.set_xlabel("Fluorescence")
 		self._target_histo_ax.set_ylabel("Cells frequency")
 		self._target_histo_canvas.draw()
-
-
 
 
 	def _update_validation_plot(self, skip=0):
@@ -537,11 +529,8 @@ class MainWindow(QtGui.QMainWindow):
 			else:
 				ratio = 1.0
 
-			print " * Calculated ratio for validation:", ratio
-			print sum(res2)
-			print sum(res)
-			print sum(res2[1:-1]/ratio)
-
+			print (" * Calculated ratio for validation:", ratio)
+			
 			self.hellingervalidation.setText( "%.3f"  % hellinger1(res2/ratio, res) )
 			self._validation_histo_ax.bar(bins2[skip:-1], res2[skip:-1]/ratio, width=diff(bins[skip:]),  color=selected_color, label="Simulation", alpha=0.5, ec="black", linewidth=0.4, align="edge")
 
@@ -552,14 +541,16 @@ class MainWindow(QtGui.QMainWindow):
 		self._validation_histo_ax.set_ylabel("Cells frequency")
 		self._validation_histo_canvas.draw()
 
+
 	def new_population(self):
 		self._add_population("unnamed population", proportion=0, mean=0,  st=0, minimum_mean=0, maximum_mean=0, minimum_sd=0, maximum_sd=0, info="")
 		self._update_populations()	
 
+
 	def remove_population(self):
 		index = self.populations_table.selectionModel().selectedRows()[0]
 		row = index.row()
-		print " * Removing row %d..." % row
+		print (" * Removing row %d..." % row)
 		del self._population_names[row]
 		del self._population_proportions[row]
 		del self._population_means[row]
@@ -612,6 +603,7 @@ class MainWindow(QtGui.QMainWindow):
 	def _create_new_population_interface(self):
 		return QtGui.QWidget()
 
+
 	def save_figures(self):
 		file = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory"))
 		if file is not None:
@@ -619,14 +611,15 @@ class MainWindow(QtGui.QMainWindow):
 			self._target_histo_figure.savefig(file+os.sep+"target_histogram.pdf", figsize=(10,7), dpi=300)
 			self._validation_histo_figure.savefig(file+os.sep+"validation_histogram.pdf", figsize=(10,7), dpi=300)
 
+
 	def _ready_to_simulate(self):
 		if self._initial_histo is not None:
 			if len(self._population_names)>0:
 				return True
 			else:
-				print "WARNING: no populations specified, aborting."
+				print ("WARNING: no populations specified, aborting.")
 		else:
-			print "WARNING: initial histogram not loaded, aborting."
+			print ("WARNING: initial histogram not loaded, aborting.")
 		return False
 
 	def _ready_to_optimize(self):
@@ -634,9 +627,9 @@ class MainWindow(QtGui.QMainWindow):
 			if len(self._population_names)>0:
 				return True
 			else:
-				print "WARNING: no populations specified, aborting."
+				print ("WARNING: no populations specified, aborting.")
 		else:
-			print "WARNING: target histogram not loaded, aborting."
+			print ("WARNING: target histogram not loaded, aborting.")
 		return False
 
 	def _check_proportions(self):
@@ -758,8 +751,17 @@ class MainWindow(QtGui.QMainWindow):
 
 		# proportion
 		elif index.column()==1:
-			item, ok  = QtGui.QInputDialog.getDouble(self, "Change proportion of population", "Enter new proportion:", float(current_value), 0, 1,3)
-			if ok and item:
+			localized_input_dialog = QtGui.QInputDialog()
+			localized_input_dialog.setInputMode(QtGui.QInputDialog.DoubleInput)
+			localized_input_dialog.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
+			localized_input_dialog.setDoubleValue(float(current_value))
+			localized_input_dialog.setDoubleMinimum(0)
+			localized_input_dialog.setDoubleMaximum(1)
+			localized_input_dialog.setDoubleDecimals(3)
+			localized_input_dialog.setWindowTitle("Change proportion of population")
+			localized_input_dialog.setLabelText("Enter new proportion:")
+			if localized_input_dialog.exec_()==QtGui.QDialog.Accepted:
+				item = localized_input_dialog.doubleValue()
 				self._population_proportions[index.row()] = item
 				self._update_populations()
 
@@ -842,7 +844,7 @@ class MainWindow(QtGui.QMainWindow):
 		all_values = self._population_minsd + self._population_maxsd +  self._population_minmean + self._population_maxmean
 		ready = len(filter(lambda x: x==0, all_values))==0
 		if not ready:
-			print "WARNING: some boundaries are not set"
+			print ("WARNING: some boundaries are not set")
 
 			msg = QtGui.QMessageBox()
 			msg.setIcon(QtGui.QMessageBox.Critical)
@@ -867,14 +869,14 @@ class MainWindow(QtGui.QMainWindow):
 		"""
 
 		if self._project_filename!=None:
-			print " * Overwriting existing project"
+			print (" * Overwriting existing project")
 			ret = self._save_project_to_file(self._project_filename)
 		else:
 			ret = self.save_project_as()
 		if ret: 
-			print " * Project saved correctly to %s" % self._project_filename
+			print (" * Project saved correctly to %s" % self._project_filename)
 		else:
-			print "ERROR: cannot save project"
+			print ("ERROR: cannot save project")
 
 	def save_project_as(self):
 		path = QtGui.QFileDialog.getSaveFileName(self, 'Save project', ".", '*.prc')
@@ -909,7 +911,7 @@ class MainWindow(QtGui.QMainWindow):
 		P.highest_bin = float(self.higherbin.value())
 		
 		P.normalize_to_target = self.normtotarget.isChecked()
-		P.asynchronous = self.async.isChecked()
+		P.asynchronous = self.asyncr.isChecked()
 		
 		P.algorithm = "Fuzzy Self-Tuning PSO"
 		P.swarm_size = int(self.swarmsize.value())
@@ -960,15 +962,15 @@ class MainWindow(QtGui.QMainWindow):
 		try: 
 			with open(path, 'rb') as inpt:
 				P = pickle.load(inpt)
-			print " * Project '%s' loaded from %s" % (P.project_name, path)
+			print (" * Project '%s' loaded from %s" % (P.project_name, path))
 			if P is None:
-				print "ERROR parsing the project file %s" % path
+				print ("ERROR parsing the project file %s" % path)
 				return
 
 			self._simulated_histo = None
 			self._validation_histo = None
 		except:
-			print "Unable to open the project file"
+			print ("Unable to open the project file")
 			return None
 
 		try:
@@ -976,7 +978,7 @@ class MainWindow(QtGui.QMainWindow):
 				self._import_initial_histo(P.initial_file)
 			self._update_statusbar(20)
 		except:
-			print "Unable to import the initial histogram"
+			print ("Unable to import the initial histogram")
 			return None
 
 		try:
@@ -984,7 +986,7 @@ class MainWindow(QtGui.QMainWindow):
 				self._import_target_histo(P.target_file)
 			self._update_statusbar(40)
 		except:
-			print "Unable to import the target histogram"
+			print ("Unable to import the target histogram")
 			return None
 
 		try:
@@ -992,7 +994,7 @@ class MainWindow(QtGui.QMainWindow):
 				self._import_validation_histo(P.validation_file)
 			self._update_statusbar(60)
 		except:
-			print "Unable to import the validation histogram"
+			print ("Unable to import the validation histogram")
 			return None
 
 		try:
@@ -1000,7 +1002,7 @@ class MainWindow(QtGui.QMainWindow):
 			self._import_populations(P.populations)
 			self._update_statusbar(70)
 		except:
-			print "Unable to import the populations"
+			print ("Unable to import the populations")
 			return None
 
 		try:
@@ -1011,18 +1013,18 @@ class MainWindow(QtGui.QMainWindow):
 			self.lowerbin.setValue(P.lowest_bin)
 			self.higherbin.setValue(P.highest_bin)
 		except:
-			print "Unable to set the time, or fluorescence, or bins"
+			print ("Unable to set the time, or fluorescence, or bins")
 			return None
 
 		try:
 			self.normtotarget.setChecked(P.normalize_to_target)
-			self.async.setChecked(P.asynchronous)
+			self.asyncr.setChecked(P.asynchronous)
 			self._update_statusbar(80)
 			self.swarmsize.setValue(P.swarm_size)
 			self.iterations.setValue(P.iterations)
 			self._update_statusbar(90)
 		except:
-			print "Unable to set the PE values"
+			print ("Unable to set the PE values")
 			return None
 
 		self.progress.reset()
@@ -1045,11 +1047,11 @@ class MainWindow(QtGui.QMainWindow):
 	def _done_optimization(self):
 		result_optimization = self.OPTTHREAD._dictionaries_results
 		
-		print " * Optimization completed"
+		print (" * Optimization completed")
 		props, means, stdivs = result_optimization
-		print props
-		print means 
-		print stdivs
+		print (props)
+		print (means)
+		print (stdivs)
 
 		namepos_dict = {}
 		for name, n in zip(self._population_names, range(len(self._population_names))):
@@ -1081,7 +1083,7 @@ class MainWindow(QtGui.QMainWindow):
 		try:
 			os.mkdir("temp")
 		except:
-			print "WARNING: cannot create temporary directory (it already exists, perhaps?)"
+			print ("WARNING: cannot create temporary directory (it already exists, perhaps?)")
 
 		self._calibrator.set_types(self._population_names)
 		self._calibrator.set_time_max(float(self.simulationtime.value())) #hours
@@ -1090,12 +1092,12 @@ class MainWindow(QtGui.QMainWindow):
 		self._calibrator.set_output_dir("temp")
 		self._calibrator.set_model_name(self.projectname.text())
 
-		print " * All information set, creating thread"
+		print (" * All information set, creating thread")
 
 		self.OPTTHREAD = OptimizationThread(self)
 		self.connect(self.OPTTHREAD, QtCore.SIGNAL("finished()"), self._done_optimization)
 
-		print "   Optimizer ready, launching optimization"
+		print ("   Optimizer ready, launching optimization")
 
 		self.OPTTHREAD.start()
 
@@ -1114,7 +1116,7 @@ class OptimizationThread(QThread):
 
 		self._parent.statusBar.showMessage("Optimization is starting. This process is time consuming, please wait...")
 		self.timer = QtCore.QTimer(self)
-		self.timer.setInterval(100)         
+		self.timer.setInterval(100)		 
 		self.countChanged.connect(self._parent._update_statusbar)
 		self.timer.timeout.connect(self._update_status)
 		self.timer.start()
@@ -1148,7 +1150,7 @@ class OptimizationThread(QThread):
 
 
 		for rep in xrange(int(self._parent.repetitions.value())):
-			print " * OPTIMIZATION %d IS STARTING (please be patient...)" % (rep)
+			print (" * OPTIMIZATION %d IS STARTING (please be patient...)" % (rep))
 			self._solution_optimization, self._fitness_solution_optimization = \
 				self._parent._calibrator.calibrate_gui(
 					max_iter=int(self._parent.iterations.value()),
@@ -1166,7 +1168,7 @@ class OptimizationThread(QThread):
 
 
 	def stop(self):
-		print " * Trying to abort optimization..."
+		print (" * Trying to abort optimization...")
 		self._parent._calibrator._abort_variable=True
 
 
@@ -1183,7 +1185,7 @@ class SimulationThread(QThread):
 		self.result_simulation_types = None
 		self._what=None
 		self.timer = QtCore.QTimer(self)
-		self.timer.setInterval(100)         
+		self.timer.setInterval(100)		 
 		self.countChanged.connect(self._parent._update_statusbar)
 		self.timer.timeout.connect(self._update_status)
 		self._cells_in_stack = 0
@@ -1245,7 +1247,7 @@ class SimulationThread(QThread):
 	def run(self):
 		
 		if self._what is None:
-			print "WARNING: cannot understand what to simulate"
+			print ("WARNING: cannot understand what to simulate")
 			return 
 
 		if self._what=="target":
@@ -1253,12 +1255,12 @@ class SimulationThread(QThread):
 		else:
 			time_max = float(self._parent.validationtime.value() ) 
 
-		PHI      = float(self._parent.fluorescencethreshold.value())
+		PHI	  = float(self._parent.fluorescencethreshold.value())
 
 
 		if self._parent._path_to_GPU_procell is not None:
-			print " * Launching GPU-powered simulation"
-			print "   preparing files...",
+			print (" * Launching GPU-powered simulation")
+			print ("   preparing files...",)
 
 			fixed_means = map(lambda x: x if isinstance(x, float) else -1., self._parent._population_means)
 			fixed_std   = map(lambda x: x if isinstance(x, float) else -1., self._parent._population_std)
@@ -1276,7 +1278,7 @@ class SimulationThread(QThread):
 				self._parent._population_names
 				)
 
-			print "done"
+			print ("done")
 
 			return
 		else:
@@ -1302,19 +1304,19 @@ class SimulationThread(QThread):
 
 
 			if self._parent.Simulator._abort_variable:
-				print " * Simulation aborted successfully"
+				print (" * Simulation aborted successfully")
 			else:
 				#print " * Simulation completed successfully"
 				pass
 
 
 	def stop(self):
-		print " * Trying to abort simulation..."
+		print (" * Trying to abort simulation...")
 		self._parent.Simulator._abort_variable=True
 
 
 if __name__ == '__main__':
 	
-	app    = QtGui.QApplication(sys.argv)
+	app	= QtGui.QApplication(sys.argv)
 	window = MainWindow()
 	sys.exit(app.exec_())
