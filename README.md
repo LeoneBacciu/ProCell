@@ -15,7 +15,9 @@ The output produced by ProCell is a histogram of GFP fluorescence after time T.
 
 This part is still under development. I am setting up the GITHUB repository and currently creating a PyPI package to simplify the installation process. 
 
-Meanwhile, you can just download the source code and launch ProCell's GUI (python gui/gui.py). A tutorial about modeling, calibration and simulation will be published soon.
+Meanwhile, you can just download the source code and launch ProCell's GUI (python gui/gui.py). A tutorial about modeling, calibration and simulation will be published soon. You can find a list of ProCell's pre-requisites here:
+
+https://docs.google.com/document/d/1OC0DDQQHAKs6sMOi7hWleWcwgU04h9RAsZzOye6dnAU/edit?usp=sharing
 
 ## GPU version of ProCell
 
