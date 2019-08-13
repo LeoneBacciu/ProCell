@@ -96,37 +96,52 @@ border: 0px solid black;
           <item>
            <layout class="QVBoxLayout" name="population_layout">
             <item>
-             <widget class="QPushButton" name="addnewpopulation">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>1</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>40</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Add new population</string>
-              </property>
-              <property name="icon">
-               <iconset>
-                <normalon>:/buttons/addnew.png</normalon>
-               </iconset>
-              </property>
-              <property name="iconSize">
-               <size>
-                <width>16</width>
-                <height>16</height>
-               </size>
-              </property>
-              <property name="flat">
-               <bool>false</bool>
-              </property>
-             </widget>
+             <layout class="QHBoxLayout" name="populationsbuttonslayout">
+              <item>
+               <widget class="QPushButton" name="addnewpopulation">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Add new population</string>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normalon>:/buttons/addnew.png</normalon>
+                 </iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>16</width>
+                  <height>16</height>
+                 </size>
+                </property>
+                <property name="flat">
+                 <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="remove_selected_population">
+                <property name="text">
+                 <string>Remove selected population</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="resources.qrc">
+                  <normaloff>:/buttons/cancel.png</normaloff>:/buttons/cancel.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item>
              <widget class="QTableView" name="populations_table">
@@ -808,9 +823,6 @@ border: 0px solid black;
             <iconset resource="resources.qrc">
              <normaloff>:/buttons/play.png</normaloff>:/buttons/play.png</iconset>
            </property>
-           <property name="shortcut">
-            <string>F5</string>
-           </property>
            <property name="default">
             <bool>true</bool>
            </property>
@@ -1345,7 +1357,6 @@ border: 0px solid black;
  </widget>
  <tabstops>
   <tabstop>projectname</tabstop>
-  <tabstop>addnewpopulation</tabstop>
   <tabstop>populations_table</tabstop>
   <tabstop>simulationtime</tabstop>
   <tabstop>validationtime</tabstop>
@@ -1797,6 +1808,22 @@ border: 0px solid black;
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>remove_selected_population</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>remove_population()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>867</x>
+     <y>122</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>587</x>
+     <y>488</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>drop_histogram()</slot>
@@ -1821,5 +1848,6 @@ border: 0px solid black;
   <slot>_open_preferences()</slot>
   <slot>_new_blank()</slot>
   <slot>click_normalize()</slot>
+  <slot>_remove_population()</slot>
  </slots>
 </ui>

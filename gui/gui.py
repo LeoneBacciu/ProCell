@@ -40,6 +40,10 @@ def rebin(series, lower, upper, N=1000):
 	res  = zeros(N, dtype=int)
 	pos  = 0
 	for k,v in zip(series.T[0], series.T[1]):
+		if k<lower:
+			if v>0: 
+				print ("%f is lower than %f, and has frequency %d" % (k,lower,v))
+				continue
 		while(k>bins[pos]):
 			pos+=1
 			if pos>=N: 
@@ -345,6 +349,8 @@ class MainWindow(QtGui.QMainWindow):
 		self.model = PandasModel(data=data)	
 		self.populations_table.setModel(self.model)
 		
+
+
 
 	def _add_population(self, name, proportion, mean, st, minimum_mean=0, maximum_mean=0, minimum_sd=0, maximum_sd=0, info=None):
 		self._population_names.append(name)
