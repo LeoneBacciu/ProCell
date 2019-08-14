@@ -215,11 +215,8 @@ border: 0px solid black;
             <string>Simulation settings</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_5">
-            <item row="6" column="4">
-             <widget class="QCheckBox" name="asyncr">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
+            <item row="0" column="2">
+             <widget class="QDoubleSpinBox" name="simulationtime">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -228,18 +225,18 @@ border: 0px solid black;
               </property>
               <property name="maximumSize">
                <size>
-                <width>200</width>
+                <width>100</width>
                 <height>16777215</height>
                </size>
               </property>
-              <property name="text">
-               <string>Random initial stage</string>
+              <property name="locale">
+               <locale language="English" country="UnitedKingdom"/>
               </property>
-              <property name="checkable">
-               <bool>true</bool>
+              <property name="maximum">
+               <double>10000.000000000000000</double>
               </property>
-              <property name="checked">
-               <bool>true</bool>
+              <property name="value">
+               <double>240.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -271,32 +268,7 @@ border: 0px solid black;
               </property>
              </widget>
             </item>
-            <item row="0" column="2">
-             <widget class="QDoubleSpinBox" name="simulationtime">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>100</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="locale">
-               <locale language="English" country="UnitedKingdom"/>
-              </property>
-              <property name="maximum">
-               <double>10000.000000000000000</double>
-              </property>
-              <property name="value">
-               <double>240.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="8">
+            <item row="3" column="7">
              <spacer name="horizontalSpacer_2">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -331,6 +303,16 @@ border: 0px solid black;
               </property>
              </widget>
             </item>
+            <item row="3" column="3">
+             <widget class="QLabel" name="label_9">
+              <property name="text">
+               <string>Lowest bin</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
             <item row="3" column="0">
              <widget class="QLabel" name="label_8">
               <property name="sizePolicy">
@@ -353,17 +335,7 @@ border: 0px solid black;
               </property>
              </widget>
             </item>
-            <item row="3" column="4">
-             <widget class="QLabel" name="label_9">
-              <property name="text">
-               <string>Lowest bin</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="6">
+            <item row="3" column="5">
              <widget class="QLabel" name="label_10">
               <property name="text">
                <string>Highest bin</string>
@@ -373,7 +345,7 @@ border: 0px solid black;
               </property>
              </widget>
             </item>
-            <item row="0" column="5">
+            <item row="0" column="4">
              <widget class="QDoubleSpinBox" name="validationtime">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -401,7 +373,7 @@ border: 0px solid black;
               </property>
              </widget>
             </item>
-            <item row="3" column="7">
+            <item row="3" column="6">
              <widget class="QDoubleSpinBox" name="higherbin">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -426,7 +398,7 @@ border: 0px solid black;
               </property>
              </widget>
             </item>
-            <item row="3" column="5">
+            <item row="3" column="4">
              <widget class="QDoubleSpinBox" name="lowerbin">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -451,7 +423,7 @@ border: 0px solid black;
               </property>
              </widget>
             </item>
-            <item row="0" column="4">
+            <item row="0" column="3">
              <widget class="QLabel" name="label_11">
               <property name="text">
                <string>Simulation time for validation (h)</string>
@@ -483,6 +455,25 @@ border: 0px solid black;
               </property>
              </widget>
             </item>
+            <item row="6" column="2">
+             <widget class="QCheckBox" name="normtotarget">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>200</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Normalize quantities</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
             <item row="3" column="2">
              <widget class="QSpinBox" name="bins">
               <property name="sizePolicy">
@@ -508,10 +499,16 @@ border: 0px solid black;
               </property>
              </widget>
             </item>
-            <item row="6" column="2">
-             <widget class="QCheckBox" name="normtotarget">
+            <item row="6" column="4">
+             <widget class="QCheckBox" name="asyncr">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
               </property>
               <property name="maximumSize">
                <size>
@@ -520,7 +517,23 @@ border: 0px solid black;
                </size>
               </property>
               <property name="text">
-               <string>Normalize quantities</string>
+               <string>Random initial stage</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="3">
+             <widget class="QCheckBox" name="resample_qty">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Force exact resampling (slow)</string>
               </property>
               <property name="checked">
                <bool>true</bool>
@@ -1385,7 +1398,6 @@ border: 0px solid black;
   <tabstop>lowerbin</tabstop>
   <tabstop>higherbin</tabstop>
   <tabstop>normtotarget</tabstop>
-  <tabstop>asyncr</tabstop>
   <tabstop>comboBox</tabstop>
   <tabstop>swarmsize</tabstop>
   <tabstop>iterations</tabstop>

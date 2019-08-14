@@ -17,6 +17,7 @@ from PyQt4.QtCore import QThread, pyqtSignal
 import resources
 from estimator import hellinger1
 from project import Project
+from collections import defaultdict
 from PyQt4.QtGui import QApplication
 try:
 	import seaborn as sns  
@@ -51,6 +52,29 @@ def rebin(series, lower, upper, N=1000):
 				return res, bins
 		res[pos] += v
 	return res, bins
+
+def resampling(series, events):
+	from random import sample
+	total_simulated_events = int(sum(series.T[1]))
+	events_to_keep = sample(range(total_simulated_events), events)
+	new_dict = defaultdict(dummy)
+	for etk in events_to_keep:
+		#print ("_determining fluorescence for event number %d" % etk)
+		accum = 0
+		for k,v in zip(series.T[0], series.T[1]):
+			accum += v
+			if accum>=etk:
+				new_dict[k] += 1
+				break
+
+	dictlist = []
+	for key, value in new_dict.iteritems():
+		temp = [key,value]
+		dictlist.append(temp)
+	dictlist = sorted(dictlist)
+	#print (dictlist)
+	dictlist = array(dictlist)
+	return dictlist
 
 def verticalResizeTableViewToContents(tableView):
 	count=tableView.verticalHeader().count()
@@ -489,14 +513,18 @@ class MainWindow(QtGui.QMainWindow):
 			selected_color = "black"
 
 		if self._simulated_histo is not None:
-			res2, bins2 = rebin(self._simulated_histo, lower, higher, N=calcbins)
+			ratio = 1.0
 			if self.normtotarget.isChecked():
-				ratio = 1.*sum(res2)/sum(res)
-			else:
-				ratio = 1.0
-
-			print (" * Calculated ratio for target:", ratio)
-
+				if sum(res)>10000: 
+					print (" * Using approximate resampling")
+					res2, bins2 = rebin(self._simulated_histo, lower, higher, N=calcbins)
+					ratio = 1.*sum(res2)/sum(res)
+					
+				else:
+					print (" * Using exact resampling")
+					resampled = resampling(self._simulated_histo, sum(res))
+					res2, bins2 = rebin(resampled, lower, higher, N=calcbins)
+			
 			self.hellingertarget.setText( "%.3f"  % hellinger1(res2/ratio, res) )
 			self._target_histo_ax.bar(bins2[skip:-1], res2[skip:-1]/ratio, width=diff(bins[skip:]),  color=selected_color, label="Simulation", alpha=0.5, ec="black", linewidth=0.4, align="edge")
 
@@ -531,14 +559,18 @@ class MainWindow(QtGui.QMainWindow):
 			selected_color = "black"
 
 		if self._simulated_validation_histo is not None:
-			res2, bins2 = rebin(self._simulated_validation_histo, lower, higher, N=calcbins)
+			ratio = 1.0
 			if self.normtotarget.isChecked():
-				ratio = 1.*sum(res2)/sum(res)
-			else:
-				ratio = 1.0
+				if sum(res)>10000: 
+					print (" * Using approximate resampling")
+					res2, bins2 = rebin(self._simulated_validation_histo, lower, higher, N=calcbins)
+					ratio = 1.*sum(res2)/sum(res)
+					
+				else:
+					print (" * Using exact resampling")
+					resampled = resampling(self._simulated_validation_histo, sum(res))
+					res2, bins2 = rebin(resampled, lower, higher, N=calcbins)
 
-			print (" * Calculated ratio for validation:", ratio)
-			
 			self.hellingervalidation.setText( "%.3f"  % hellinger1(res2/ratio, res) )
 			self._validation_histo_ax.bar(bins2[skip:-1], res2[skip:-1]/ratio, width=diff(bins[skip:]),  color=selected_color, label="Simulation", alpha=0.5, ec="black", linewidth=0.4, align="edge")
 
@@ -1232,8 +1264,7 @@ class SimulationThread(QThread):
 		
 	def _launch_GPU_simulation(self, executable, initial_histo, model_file, time_max, PHI, names):
 		from subprocess import check_output
-		from collections import defaultdict
-
+		
 		ret = check_output([executable, "-h", initial_histo, "-c", model_file, "-t", str(time_max), "-p", str(PHI), "-r"])
 		split_rows = ret.split("\n")
 
