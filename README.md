@@ -1,8 +1,8 @@
 # ProCell
 
-ProCell is a modeling and simulation framework to investigate cell proliferation dynamics that, differently from other approaches, takes into account the inherent stochasticity of cell division events.
+ProCell is an [award winning](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=8791485) modeling and simulation framework designed to investigate cell proliferation dynamics that, differently from other approaches, takes into account the inherent stochasticity of cell division events.
 
-ProCell uses as input:
+ProCell manipulates raw data coming from flow cytometry experiments. Specifically, uses as input:
 - a histogram of initial cell fluorescences (e.g., GFP signal in the population); 
 - the number of different sub-populations, along with their proportions;
 - the mean and standard deviation of division time for each population;
