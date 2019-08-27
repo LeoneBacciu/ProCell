@@ -14,18 +14,38 @@ from numpy.random import uniform
 from pylab import *
 import pandas as pd
 from PyQt4.QtCore import QThread, pyqtSignal
-import resources
+try:
+	import resources
+except:
+	import resources3
 from estimator import hellinger1
 from project import Project
 from collections import defaultdict
 from PyQt4.QtGui import QApplication
 try:
 	import seaborn as sns  
+	sns.despine()
 except:
 	print ("WARNING: Seaborn not installed")
 from estimator import Calibrator
-from ConfigParser import SafeConfigParser
+try:
+	from configparser import ConfigParser
+except:
+	from ConfigParser import ConfigParser
 from new_projects_bag import Projects
+
+try:
+	MAXINT = sys.maxint
+except:
+	MAXINT = sys.maxsize
+
+try:
+	urange = xrange
+except:
+	urange = range
+
+
+USE_DARK_SKIN = True
 
 def dummy(): return 0
 
@@ -56,7 +76,10 @@ def rebin(series, lower, upper, N=1000):
 def resampling(series, events):
 	from random import sample
 	total_simulated_events = int(sum(series.T[1]))
-	events_to_keep = sample(range(total_simulated_events), events)
+	if events>total_simulated_events:
+		events_to_keep = range(total_simulated_events)
+	else:
+		events_to_keep = sample(range(total_simulated_events), events)
 	new_dict = defaultdict(dummy)
 	for etk in events_to_keep:
 		#print ("_determining fluorescence for event number %d" % etk)
@@ -68,7 +91,7 @@ def resampling(series, events):
 				break
 
 	dictlist = []
-	for key, value in new_dict.iteritems():
+	for key, value in new_dict.items():
 		temp = [key,value]
 		dictlist.append(temp)
 	dictlist = sorted(dictlist)
@@ -81,7 +104,7 @@ def verticalResizeTableViewToContents(tableView):
 	scrollBarHeight=tableView.horizontalScrollBar().height()
 	horizontalHeaderHeight=tableView.horizontalHeader().height()
 	rowTotalHeight = 0
-	for i in xrange(count):
+	for i in urange(count):
 		rowTotalHeight+=tableView.verticalHeader().sectionSize(i)
 	tableView.setMinimumHeight(horizontalHeaderHeight+rowTotalHeight+scrollBarHeight)
 
@@ -104,6 +127,16 @@ class PandasModel(QtCore.QAbstractTableModel):
 		if index.isValid():
 			if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
 				return str(self._data.values[index.row()][index.column()])
+			elif role == QtCore.Qt.TextAlignmentRole:
+				return QtCore.Qt.AlignCenter
+
+			if role == QtCore.Qt.BackgroundRole and index.column() == 1:
+				
+				if (sum(self._data["Proportion"])-1)<1e-3:
+					return QtGui.QColor("#1B212F")
+				else: 	
+					return QtGui.QColor("#9B212F")
+
 		return None
 
 	def headerData(self, col, orientation, role):
@@ -149,7 +182,7 @@ class MainWindow(QtGui.QMainWindow):
 
 	def __init__(self):
 		super(MainWindow, self).__init__()
-		uic.loadUi('mainwindow.ui', self)
+		uic.loadUi('mainwindow2.ui', self)
 
 		self._about_window = AboutWindow()
 		self._preferences_window = PreferencesWindow()
@@ -174,11 +207,17 @@ class MainWindow(QtGui.QMainWindow):
 		self._target_histo_canvas.setStyleSheet("background:transparent;"); self._target_histo_figure.set_facecolor("#ffff0000")
 		self._validation_histo_canvas.setStyleSheet("background:transparent;"); self._validation_histo_figure.set_facecolor("#ffff0000")
 
+		"""
 		self._target_histo_ax.set_xlabel("Fluorescence")
 		self._target_histo_ax.set_ylabel("Cells frequency")
 
 		self._initial_histo_ax.set_xlabel("Fluorescence")
 		self._initial_histo_ax.set_ylabel("Cells frequency")
+
+		self._validation_histo_ax.set_xlabel("Fluorescence")
+		self._validation_histo_ax.set_ylabel("Cells frequency")
+		"""
+
 
 		self.initial_layout.addWidget(self._initial_histo_canvas)
 		self.target_layout.addWidget(self._target_histo_canvas)
@@ -219,7 +258,12 @@ class MainWindow(QtGui.QMainWindow):
 		#self._load_project_from_file("./prova.prc")		
 		"""
 		self._project_filename = None
-		self._version = "1.5.0"
+		self._version = "1.6.0"
+
+		# functionalities override
+		self._force_resample = False
+		self._force_CPU      = False
+
 
 		self._update_window_title()
 
@@ -227,16 +271,39 @@ class MainWindow(QtGui.QMainWindow):
 		self._calibrator.distribution = "gauss"  # default semantics
 
 		self._recent_projects = Projects()
-		self._config = SafeConfigParser()
+		self._config = ConfigParser()
 		self._path_to_GPU_procell = None
 
 		self._open_config()
 		
 		#self._load_project_from_file("../models/model3.prc")
+		self._reload_qss()
+		
+		self.populations_table.verticalHeader().setVisible(False)
 
+		self._place_logo()
 		
 		self.show()
 
+
+	def _place_logo(self):
+		label = QtGui.QLabel("Prova", self)
+		mypix = QtGui.QPixmap (":/buttons/procell_logo_small.png")
+		label.setPixmap(mypix)
+		#label.setScaledContents(True)
+		label.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
+		#label.setMaximumSize(QtCore.QSize(110,20))
+		#label.setContentsMargins(0,0,120,20);
+		self.menubar.setCornerWidget(label, QtCore.Qt.TopRightCorner)
+
+		#self.centralwidget.layout().addWidget(label)
+
+
+	def _reload_qss(self):
+		sshFile="procell.qss"
+		with open(sshFile,"r") as fh:
+			self.setStyleSheet(fh.read())
+		print (" * Style Sheet %s loaded" % sshFile)
 
 	def closeEvent(self, event):
 		self._save_config()
@@ -256,7 +323,7 @@ class MainWindow(QtGui.QMainWindow):
 				self._path_to_GPU_procell = ptp
 				last_project = self._config.get("main", "last_project")
 
-				for x in xrange(10):
+				for x in urange(10):
 					ppath = self._config.get("recent", "proj%d" % (x+1))
 					self._recent_projects.add(ppath)
 			except:
@@ -291,7 +358,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
 	def _save_config(self):
-		self._config = SafeConfigParser()
+		self._config = ConfigParser()
 		
 		# main section
 		self._config.add_section('main')
@@ -307,7 +374,7 @@ class MainWindow(QtGui.QMainWindow):
 		# recent projects
 		self._config.add_section('recent')
 		projects = self._recent_projects._projects[-10:]
-		for n in xrange(10):
+		for n in urange(10):
 			try:
 				pname = projects[n]
 				self._config.set('recent', 'proj%d' % (n+1), pname)
@@ -319,6 +386,7 @@ class MainWindow(QtGui.QMainWindow):
 	
 
 	def _open_preferences(self):
+		self._preferences_window.path_cuprocell.setText(self._path_to_GPU_procell)
 		if self._preferences_window.exec_() == QtGui.QDialog.Accepted:
 			self._path_to_GPU_procell = str(self._preferences_window.path_cuprocell.text())
 		print (" * New path to cuProCell:", self._path_to_GPU_procell)
@@ -374,9 +442,20 @@ class MainWindow(QtGui.QMainWindow):
 		data = self._get_population_data_frame()
 		self.model = PandasModel(data=data)	
 		self.populations_table.setModel(self.model)
+		if not self._check_proportions():
+			print (" * Error with proportions detected!")
+			self._set_column_proportions_color("#FF212F")
+		else:
+			self._set_column_proportions_color("#1B212F")
+
+
+	def _set_column_proportions_color(self, rgb):
+		pass
+		#for i in urange(len(self._population_proportions)):
+			#item = self.populations_table.model().index(i,1)
+			#self.model.setData(item, QtGui.QBrush(QtCore.Qt.red), QtCore.Qt.BackgroundRole)
+
 		
-
-
 
 	def _add_population(self, name, proportion, mean, st, minimum_mean=0, maximum_mean=0, minimum_sd=0, maximum_sd=0, info=None):
 		self._population_names.append(name)
@@ -392,16 +471,28 @@ class MainWindow(QtGui.QMainWindow):
 		verticalResizeTableViewToContents(self.populations_table)
 
 	def _get_population_data_frame(self):
-		return  pd.DataFrame({	'1. Population name': self._population_names, 
-								'2. Proportion': self._population_proportions, 
-								'3. Mean division time': self._population_means, 
-								'4. Standard deviation': self._population_std, 
-								'5. Mean division time (minimum)': self._population_minmean,
-								'6. Mean division time (maximum)': self._population_maxmean,
-								'7. Standard deviation division time (minimum)': self._population_minsd,
-								'8. Standard deviation division time (maximum)': self._population_maxsd,
-								'9. Info': self._population_info}
+		df =  pd.DataFrame({	'Population name': self._population_names, 
+								'Proportion': self._population_proportions, 
+								'Mean division time': self._population_means, 
+								'Standard deviation': self._population_std, 
+								'Mean division time (minimum)': self._population_minmean,
+								'Mean division time (maximum)': self._population_maxmean,
+								'Standard deviation division time (minimum)': self._population_minsd,
+								'Standard deviation division time (maximum)': self._population_maxsd,
+								'Info': self._population_info}
 						)
+		df = df.reindex([
+			'Population name', 
+			'Proportion',
+			'Mean division time', 
+			'Standard deviation',
+			'Mean division time (minimum)',
+			'Mean division time (maximum)',
+			'Standard deviation division time (minimum)',
+			'Standard deviation division time (maximum)',
+			'Info'
+			], axis=1)
+		return df
 
 	def drop_histogram(self):
 		print ("NOT IMPLEMENTED YET")
@@ -449,11 +540,12 @@ class MainWindow(QtGui.QMainWindow):
 			self.normtotarget.setEnabled(False)
 			return False
 
+
 	def _import_validation_histo(self, path):
 		path = str(path)
 		try:
 			A = loadtxt(path)
-			#print "Valid histogram found. Data:"; 			print A
+			print (" * Attempting the import of the validation histogram %s" % path)
 			self._validation_histo = A[:]
 			self._validation_histo_path = path
 			self._update_validation_plot()		
@@ -463,6 +555,7 @@ class MainWindow(QtGui.QMainWindow):
 			self._message_error("ERROR: invalid histogram specified")
 			self._validation_histo = None
 			return False
+
 
 	def import_target_histo(self):
 		# open dialog
@@ -490,6 +583,11 @@ class MainWindow(QtGui.QMainWindow):
 		self._update_all_plots()
 
 
+	def heuristic(self):
+		if self._force_resample:	return MAXINT
+		else:								return 10000
+
+
 	def _update_target_plot(self, skip=0):
 		self._target_histo_ax.cla()
 		if self._target_histo is None: return
@@ -505,7 +603,7 @@ class MainWindow(QtGui.QMainWindow):
 
 		if self._target_histo is not None:
 			res, bins = rebin(self._target_histo, lower, higher, N=calcbins)
-			self._target_histo_ax.bar(bins[skip:-1], res[skip:-1], width=diff(bins[skip:]),  color=selected_color, label="Target", alpha=0.5, ec="black", linewidth=0.4, align="edge")
+			self._target_histo_ax.bar(bins[skip:-1], res[skip:-1], width=diff(bins[skip:]),  color=selected_color, label="Target histogram", alpha=0.5, ec="black", linewidth=0.4, align="edge")
 
 		if self.usecolors.isChecked():
 			selected_color = "green"
@@ -515,24 +613,34 @@ class MainWindow(QtGui.QMainWindow):
 		if self._simulated_histo is not None:
 			ratio = 1.0
 			if self.normtotarget.isChecked():
-				if sum(res)>10000: 
-					print (" * Using approximate resampling")
+				if sum(res)>self.heuristic(): 
+					#print (" * Using approximate resampling")
 					res2, bins2 = rebin(self._simulated_histo, lower, higher, N=calcbins)
 					ratio = 1.*sum(res2)/sum(res)
 					
 				else:
-					print (" * Using exact resampling")
+					#print (" * Using exact resampling")
 					resampled = resampling(self._simulated_histo, sum(res))
 					res2, bins2 = rebin(resampled, lower, higher, N=calcbins)
+			else:
+				res2, bins2 = rebin(self._simulated_histo, lower, higher, N=calcbins)
 			
 			self.hellingertarget.setText( "%.3f"  % hellinger1(res2/ratio, res) )
 			self._target_histo_ax.bar(bins2[skip:-1], res2[skip:-1]/ratio, width=diff(bins[skip:]),  color=selected_color, label="Simulation", alpha=0.5, ec="black", linewidth=0.4, align="edge")
 
 		self._target_histo_ax.set_xscale("symlog")
 		self._target_histo_ax.set_xlim(bins[0],bins[-1])
-		self._target_histo_figure.legend(framealpha=1.)
-		self._target_histo_ax.set_xlabel("Fluorescence")
-		self._target_histo_ax.set_ylabel("Cells frequency")
+		# self._target_histo_figure.legend(framealpha=1.)
+		self._target_histo_ax.set_xlabel("Fluorescence", color="#A0A7B760")
+		self._target_histo_ax.set_ylabel("Cells frequency", color="#A0A7B760")
+		self._target_histo_ax.tick_params(axis='both', colors='#A0A7B7', labelcolor='#A0A7B7', grid_color='#A0A7B7')
+
+		#self._target_histo_ax.spines['bottom'].set_color('white')
+		#self._target_histo_ax.xaxis.label.set_color('#A0A7B7')
+		#self._target_histo_ax(axis='x', colors='#A0A7B7')
+		if USE_DARK_SKIN:
+			self._target_histo_ax.set_facecolor('#131721')
+
 		self._target_histo_canvas.draw()
 
 
@@ -545,13 +653,13 @@ class MainWindow(QtGui.QMainWindow):
 		calcbins = int(self.bins.value())
 		
 		if self.usecolors.isChecked():
-			selected_color = "purple"
+			first_color = "purple"
 		else:
-			selected_color = "gray"
+			first_color = "gray"
 				
 		if self._validation_histo is not None:
 			res, bins = rebin(self._validation_histo, lower, higher, N=calcbins)
-			self._validation_histo_ax.bar(bins[skip:-1], res[skip:-1], width=diff(bins[skip:]),  color=selected_color, label="Validation histogram", alpha=0.5, linewidth=0.4, ec="black", align="edge")
+			self._validation_histo_ax.bar(bins[skip:-1], res[skip:-1], width=diff(bins[skip:]),  color=first_color, label="Validation histogram", alpha=0.5, linewidth=0.4, ec="black", align="edge")
 
 		if self.usecolors.isChecked():
 			selected_color = "green"
@@ -561,24 +669,42 @@ class MainWindow(QtGui.QMainWindow):
 		if self._simulated_validation_histo is not None:
 			ratio = 1.0
 			if self.normtotarget.isChecked():
-				if sum(res)>10000: 
-					print (" * Using approximate resampling")
+				if sum(res)>self.heuristic(): 
+					#print (" * Using approximate resampling")
 					res2, bins2 = rebin(self._simulated_validation_histo, lower, higher, N=calcbins)
 					ratio = 1.*sum(res2)/sum(res)
 					
 				else:
-					print (" * Using exact resampling")
+					#print (" * Using exact resampling")
 					resampled = resampling(self._simulated_validation_histo, sum(res))
 					res2, bins2 = rebin(resampled, lower, higher, N=calcbins)
+			else:
+				res2, bins2 = rebin(self._simulated_validation_histo, lower, higher, N=calcbins)
 
 			self.hellingervalidation.setText( "%.3f"  % hellinger1(res2/ratio, res) )
 			self._validation_histo_ax.bar(bins2[skip:-1], res2[skip:-1]/ratio, width=diff(bins[skip:]),  color=selected_color, label="Simulation", alpha=0.5, ec="black", linewidth=0.4, align="edge")
 
 		self._validation_histo_ax.set_xscale("symlog")
 		self._validation_histo_ax.set_xlim(bins[0],bins[-1])
-		self._validation_histo_figure.legend(framealpha=1.)
-		self._validation_histo_ax.set_xlabel("Fluorescence")
-		self._validation_histo_ax.set_ylabel("Cells frequency")
+		#self._validation_histo_figure.legend(framealpha=1.)
+		
+		self._validation_histo_ax.set_xlabel("Fluorescence", color="#A0A7B760")
+		self._validation_histo_ax.set_ylabel("Cells frequency", color="#A0A7B760")
+		self._validation_histo_ax.tick_params(axis='both', colors='#A0A7B7', labelcolor='#A0A7B7', grid_color='#A0A7B7')
+
+		from matplotlib.lines import Line2D
+		custom_lines = [	Line2D([0], [0], color=first_color, lw=0, marker="o" ),
+							Line2D([0], [0], color=selected_color, lw=0, marker="o" )]
+		
+		# leg = self._validation_histo_figure.legend(custom_lines, ['Validation histogram', 'Simulation'], ncol=2,  framealpha=0., loc='best')
+		#for text in leg.get_texts():
+		#	text.set_color("#A0A7B760")
+
+		if USE_DARK_SKIN:
+			self._validation_histo_ax.set_facecolor('#131721')
+
+		self._validation_histo_figure.tight_layout()
+
 		self._validation_histo_canvas.draw()
 
 
@@ -624,8 +750,10 @@ class MainWindow(QtGui.QMainWindow):
 		
 		res, bins = rebin(self._initial_histo, lower, higher, N=calcbins)
 
-		self._initial_histo_ax.set_xlabel("Fluorescence")
-		self._initial_histo_ax.set_ylabel("Cells frequency")
+		self._initial_histo_ax.set_xlabel("Fluorescence", color="#A0A7B760")
+		self._initial_histo_ax.set_ylabel("Cells frequency", color="#A0A7B760")
+		self._initial_histo_ax.tick_params(axis='both', colors='#A0A7B7', labelcolor='#A0A7B7', grid_color='#A0A7B7')
+
 		if self.usecolors.isChecked():
 			selected_color = "red"
 		else:
@@ -635,7 +763,21 @@ class MainWindow(QtGui.QMainWindow):
 		
 		self._initial_histo_ax.set_xscale("symlog")
 		self._initial_histo_ax.set_xlim(bins[0],bins[-1])
-		self._initial_histo_figure.legend(framealpha=1.)
+		
+		from matplotlib.lines import Line2D
+		custom_lines = [	Line2D([0], [0], color=selected_color, lw=0, marker="o" )]
+		box = self._initial_histo_ax.get_position()
+		self._initial_histo_ax.set_position([box.x0, box.y0, box.width , box.height * 0.8])
+		
+		# leg = self._initial_histo_figure.legend(custom_lines, ['Initial histogram'], ncol=2, bbox_to_anchor=(0.4, 0.1), framealpha=0., )
+		#for text in leg.get_texts():
+		#	text.set_color("#A0A7B7")
+	
+		if USE_DARK_SKIN:
+			self._initial_histo_ax.set_facecolor('#131721')
+
+		#sns.despine(ax=self._initial_histo_ax, left=True, bottom=True)
+
 		self._initial_histo_canvas.draw()
 
 
@@ -691,7 +833,7 @@ class MainWindow(QtGui.QMainWindow):
 
 				self.launch_simulation.setEnabled(False)
 				self.runvalidation.setEnabled(False)
-				self.abort.setEnabled(True)
+				#self.abort.setEnabled(True)
 				self.YTN.start()
 			else:
 				self._error_proportions()
@@ -748,7 +890,7 @@ class MainWindow(QtGui.QMainWindow):
 
 			self.launch_simulation.setEnabled(False)
 			self.runvalidation.setEnabled(False)
-			self.abort.setEnabled(True)
+			#self.abort.setEnabled(True)
 			self.YTN.start()
 
 	def _done_simulation(self):
@@ -760,18 +902,22 @@ class MainWindow(QtGui.QMainWindow):
 
 			if self.YTN._what == "target":
 				self._simulated_histo = sorted_res
-				self.statusBar.showMessage("Simulation completed.")
+				if self.normtotarget.isChecked():
+					self.statusBar.showMessage("Simulation completed, normalization in progress (please wait)...")
 				self._update_target_plot()
+				self.statusBar.showMessage("Simulation completed.")
 			else:
 				self._simulated_validation_histo = sorted_res
-				self.statusBar.showMessage("Validation completed.")
+				if self.normtotarget.isChecked():
+					self.statusBar.showMessage("Simulation for validation completed, normalization in progress (please wait)...")
 				self._update_validation_plot()
+				self.statusBar.showMessage("Simulation for validation completed.")
 		else:
-			self.statusBar.showMessage("Simulation aborted.")
+			self.statusBar.showMessage("Simulation was aborted.")
 
 		self.launch_simulation.setEnabled(True)
 		self.runvalidation.setEnabled(True)
-		self.abort.setEnabled(False)
+		#self.abort.setEnabled(False)
 		self.Simulator._abort_variable = False
 		self.YTN.timer.stop()
 		self.progress.reset()
@@ -883,10 +1029,27 @@ class MainWindow(QtGui.QMainWindow):
 				self._update_populations()
 
 
+	def _check_proliferating_for_pe(self):
+		if len(list(filter(lambda x: x!='-', self._population_minsd)))==0:
+
+			print ("WARNING: no proliferating populations found, I cannot calibrate")
+
+			msg = QtGui.QMessageBox()
+			msg.setIcon(QtGui.QMessageBox.Critical)
+			msg.setText("All the populations seem to be quiescent. Please add at least one proliferating population.")
+			msg.setWindowTitle("Unable to run optimization")
+			#msg.setStandardButtons(QtGui.QMessageBox.OK)
+			ret = msg.exec_()
+
+			return False
+		else:
+			return True
+
 
 	def _check_boundaries_for_pe(self):
 		all_values = self._population_minsd + self._population_maxsd +  self._population_minmean + self._population_maxmean
-		ready = len(filter(lambda x: x==0, all_values))==0
+		ready = len(list(filter(lambda x: x==0, all_values)))==0
+
 		if not ready:
 			print ("WARNING: some boundaries are not set")
 
@@ -1123,6 +1286,8 @@ class MainWindow(QtGui.QMainWindow):
 		if not self._check_boundaries_for_pe():
 			return
 
+		if not self._check_proliferating_for_pe():
+			return
 
 		try:
 			os.mkdir("temp")
@@ -1193,7 +1358,7 @@ class OptimizationThread(QThread):
 		#search_space += [ [x,y] for (x,y) in zip(self._population_minsd, self._population_maxsd) ]
 
 
-		for rep in xrange(int(self._parent.repetitions.value())):
+		for rep in urange(int(self._parent.repetitions.value())):
 			print (" * OPTIMIZATION %d IS STARTING (please be patient...)" % (rep))
 			self._solution_optimization, self._fitness_solution_optimization = \
 				self._parent._calibrator.calibrate_gui(
@@ -1266,17 +1431,22 @@ class SimulationThread(QThread):
 		from subprocess import check_output
 		
 		ret = check_output([executable, "-h", initial_histo, "-c", model_file, "-t", str(time_max), "-p", str(PHI), "-r"])
+		ret = str(ret.decode('ascii')).replace('\n\n', '\n')
+		with open('pd', 'w') as fo:
+			fo.write(ret)
 		split_rows = ret.split("\n")
-
+		#print (split_rows)
+		#exit()
 		result = defaultdict(dummy)
 		types  = defaultdict(list)
 
 		for row in split_rows:
 			row = row.strip("\r")
 			try:
-				tokenized_row = map(float, row.split("\t"))
+				tokenized_row = list(map(float, row.split("\t")))
 			except ValueError:
 				continue
+			#print (tokenized_row)
 			fluorescence = tokenized_row[0]
 			total = tokenized_row[1]
 			result[fluorescence]=total
@@ -1303,7 +1473,7 @@ class SimulationThread(QThread):
 
 		if self._parent._path_to_GPU_procell is not None:
 			print (" * Launching GPU-powered simulation")
-			print ("   preparing files...",)
+			#print ("   preparing files...",)
 
 			fixed_means = map(lambda x: x if isinstance(x, float) else -1., self._parent._population_means)
 			fixed_std   = map(lambda x: x if isinstance(x, float) else -1., self._parent._population_std)
@@ -1321,7 +1491,7 @@ class SimulationThread(QThread):
 				self._parent._population_names
 				)
 
-			print ("done")
+			#print ("done")
 
 			return
 		else:

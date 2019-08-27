@@ -15,28 +15,28 @@ class CellsPopulation(object):
 		self.total_cells = 0
 
 		if abs(sum(types_p.values())-1.0)>1e-15:
-			print "ERROR: probability distribution of cell types does not sum to 1, aborting."
+			print ("ERROR: probability distribution of cell types does not sum to 1, aborting.")
 			#print sum(types_p.values())-1.0
 			exit(1)
 		else:
 			self.types_p = types_p
 
 		if timers['slow']<timers['fast']:
-			print "WARNING: timer of fast reactions is smaller than slow reactions."
+			print ("WARNING: timer of fast reactions is smaller than slow reactions.")
 			exit(4)
 		else:
 			self.timer = timers
 			self.sigma = sigma
 
 		if initial_histogram==None:
-			print "ERROR: no initial histogram was provided, aborting."
+			print ("ERROR: no initial histogram was provided, aborting.")
 			exit(2)
 		else:
 			self.fluorescences, self.frequencies = self.load_histogram_from_file(initial_histogram)
 
 		self.last_ID = self.create_cells_stack()
 
-		if verbose: print " * New population of cells created with the following characteristics:\n", self.timer, self.sigma, self.types_p
+		if verbose: print (" * New population of cells created with the following characteristics:\n", self.timer, self.sigma, self.types_p)
 
 
 	def create_cell(self, cell_type=None, fluorescence=0, ID=0):

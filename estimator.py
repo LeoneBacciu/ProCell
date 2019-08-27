@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys, os
 from fstpso import FuzzyPSO
 from procell import Simulator
@@ -159,10 +160,10 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 
 	std_div       = dict(zip(names, putative_std))	
 
-	print "Testing the following parameterization:"
-	print " - Proportions:", proportions
-	print " - Mean:", mean_div
-	print " - STD:", std_div
+	print ("Testing the following parameterization:")
+	print (" - Proportions:", proportions)
+	print (" - Mean:", mean_div)
+	print (" - STD:", std_div)
 
 	phi = float(gui.fluorescencethreshold.value())
 	time_max = float(gui.simulationtime.value() ) 
@@ -185,7 +186,7 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 				names
 				)
 		except:
-			print "ERROR: simulation on GPU crashed for unknown reasons."
+			print ("ERROR: simulation on GPU crashed for unknown reasons.")
 
 		#print "done"
 
@@ -211,7 +212,7 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 	ratio = 1.0*sum(result_simulation_rebinned)/sum(target_rebinned)
 	fitness = hellinger1(result_simulation_rebinned/ratio, target_rebinned)
 
-	print " - Fitness:", fitness, "\n"
+	print (" - Fitness:", fitness, "\n")
 
 	if return_dictionaries==False: 	return fitness
 	return proportions, mean_div, std_div
@@ -285,9 +286,9 @@ def fitness(p):
 	
 	Sim = Simulator()
 
-	print "Proportions:", proportions
-	print "Mean:", mean_div
-	print "STD:", std_div
+	print ("Proportions:", proportions)
+	print ("Mean:", mean_div)
+	print ("STD:", std_div)
 
 	result_simulation, result_simulation_types = Sim.simulate(
 			path=C._H0, types=C._types, proportions=proportions,
@@ -307,7 +308,7 @@ def fitness(p):
 	fitness = hellinger1(result_simulation_rebinned/ratio, target_rebinned)
 	#fitness = fitness_evaluate(result_simulation_rebinned, target_rebinned)
 
-	print "Fitness:", fitness, "\n"
+	print ("Fitness:", fitness, "\n")
 
 	return fitness
 
@@ -364,8 +365,8 @@ class Calibrator(object):
 		if self._time_max<=0: 		raise Exception("Please specify a maximum time for estimation")
 		if self._distribution=="": 	raise Exception("Please specify the type of distribution")
 
-		print " * Initial controls passed, loading FST-PSO"
-		print "   using distribution: %s" % self._distribution
+		print (" * Initial controls passed, loading FST-PSO")
+		print ("   using distribution: %s" % self._distribution)
 
 		FP = LogFSTPSO()
 		FP.set_swarm_size(50)
@@ -460,8 +461,8 @@ class Calibrator(object):
 		if self._time_max<=0: 		raise Exception("Please specify a maximum time for estimation")
 		if self._distribution=="": 	raise Exception("Please specify the type of distribution")
 
-		print " * Initial controls passed, loading FST-PSO"
-		print "   using distribution: %s" % self._distribution
+		print (" * Initial controls passed, loading FST-PSO")
+		print ("   using distribution: %s" % self._distribution)
 
 		if append_time_stamp:
 			time_stamp = str(self.time_stamp())
@@ -501,22 +502,22 @@ if __name__ == "__main__":
 	try:
 		opts, args = getopt.getopt(argv[1:],"i:t:m:o:r:d:",["initial=", "target=", "model=", "output=", "repetition=", "distribution="])
 	except getopt.GetoptError:
-		print 'test.py -i <initial histogram> -t <target histogram> -m <model> -o <outputdir> -r <repetition> -d <distribution>'
+		print ('test.py -i <initial histogram> -t <target histogram> -m <model> -o <outputdir> -r <repetition> -d <distribution>')
 		sys.exit(2)
 	
 	for opt, arg in opts:
 		if opt == '-h':
-			print 'test.py -i <initial> -t <target> -o <outputdir> -r <repetition> -d <distribution>'
+			print ('test.py -i <initial> -t <target> -o <outputdir> -r <repetition> -d <distribution>')
 			sys.exit()
 		elif opt in ("-i", "--initial"):
 			initial_histogram = arg
-			print " * Using initial histogram", initial_histogram
+			print (" * Using initial histogram", initial_histogram)
 		elif opt in ("-t", "--target"):
 			target_histogram = arg
-			print " * Using target histogram", target_histogram
+			print (" * Using target histogram", target_histogram)
 		elif opt in ("-m", "--model"):
 			model = arg
-			print " * Using model", model
+			print (" * Using model", model)
 		elif opt in ("-o", "--output"):
 			outputdir = arg
 		elif opt in ("-r", "--repetition"):
@@ -547,6 +548,6 @@ if __name__ == "__main__":
 	C.set_target_from_file(target_histogram)
 
 	res = C.calibrate(repetition=repetition, max_iter=100)
-	print res
+	print (res)
 
 
