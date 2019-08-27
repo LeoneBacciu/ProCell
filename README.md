@@ -19,7 +19,9 @@ Meanwhile, you can just download the source code and launch ProCell's GUI (pytho
 
 ![ProCell's GUI](https://lh5.googleusercontent.com/wj8YpG-YqbE2wkeN2kJXKiKVox_Kj3GL5kt3X9dKRRuxqqw6fTgbUNNakCGrNspP-zeGJ1fqH6sFrgQOPC94IB7jRwUZ8syAlFst85Mji6QV4NMKaZDkfbhEtpYXKNRctWt4IaTc)
 
-A tutorial about modeling, calibration and simulation will be published soon. You can find a list of ProCell's pre-requisites here:
+A tutorial about modeling, calibration, simulation and validation will be published soon. 
+
+You can find a list of ProCell's pre-requisites here:
 
 https://docs.google.com/document/d/1OC0DDQQHAKs6sMOi7hWleWcwgU04h9RAsZzOye6dnAU/edit?usp=sharing
 
