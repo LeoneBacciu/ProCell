@@ -1,0 +1,27 @@
+<RCC>
+  <qresource prefix="buttons">
+    <file>procell_logo_small.png</file>
+    <file>procell_logo.png</file>
+    <file>play.png</file>
+    <file>validate.png</file>
+    <file>smile.jpg</file>
+    <file>cells.png</file>
+    <file>stop.png</file>
+    <file>cancel.png</file>
+    <file>addnew.png</file>
+    <file>petri_dish.png</file>
+  </qresource>
+  <qresource prefix="style">
+    <file>theme/checkbox_checked_enabled.png</file>
+    <file>theme/triangolino_giu.png</file>
+    <file>theme/triangolino_giu_hover_pressed.png</file>
+    <file>theme/triangolino_su.png</file>
+    <file>theme/triangolino_su_hover_pressed.png</file>
+    <file>theme/checkbox_checked_enabled_hover.png</file>
+    <file>theme/checkbox_unchecked_disabled.png</file>
+    <file>theme/checkbox_unchecked_enabled.png</file>
+    <file>theme/checkbox_unchecked_enabled_hover.png</file>
+    <file>theme/checkbox_checked_disabled.png</file>
+  </qresource>
+  <qresource prefix="css"/>
+</RCC>
