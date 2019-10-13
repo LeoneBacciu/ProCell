@@ -57,15 +57,13 @@ def spawn():
 	new_exec = [sys.executable, os.path.realpath(__file__), "empty"]
 	ret = check_output(new_exec)
 
-def rebin(series, lower, upper, N=1000):
+def rebin(series, lower, upper, thr=0, N=1000):
 	bins = logspace(ceil(log10(lower)), ceil(log10(upper)), N)
 	res  = zeros(N, dtype=int)
 	pos  = 0
 	for k,v in zip(series.T[0], series.T[1]):
-		if k<lower:
-			if v>0: 
-				#print ("%f is lower than %f, and has frequency %d" % (k,lower,v))
-				continue
+		if k<lower or k<thr:
+			if v>0: continue
 		while(k>bins[pos]):
 			pos+=1
 			if pos>=N: 
@@ -259,7 +257,7 @@ class MainWindow(QtGui.QMainWindow):
 		#self._load_project_from_file("./prova.prc")		
 		"""
 		self._project_filename = None
-		self._version = "1.6.1"
+		self._version = "1.6.3"
 
 		# functionalities override
 		self._force_resample = False
@@ -648,14 +646,16 @@ class MainWindow(QtGui.QMainWindow):
 		lower = float(self.lowerbin.value())
 		higher = float(self.higherbin.value())
 		calcbins = int(self.bins.value())
+		thr = float(self.fluorescencethreshold.value())
 
 		if self.usecolors.isChecked():
 			selected_color = "cyan"
 		else:
 			selected_color = "#DDDDDD"
 
+		# plot target histogram
 		if self._target_histo is not None:
-			res, bins = rebin(self._target_histo, lower, higher, N=calcbins)
+			res, bins = rebin(self._target_histo, lower, higher, thr, N=calcbins)
 			self._target_histo_ax.bar(bins[skip:-1], res[skip:-1], width=diff(bins[skip:]),  color=selected_color, label="Target histogram", alpha=0.5, ec="black", linewidth=0.4, align="edge")
 
 		if self.usecolors.isChecked():
@@ -668,29 +668,31 @@ class MainWindow(QtGui.QMainWindow):
 			if self.normtotarget.isChecked():
 				if sum(res)>self.heuristic(): 
 					#print (" * Using approximate resampling")
-					res2, bins2 = rebin(self._simulated_histo, lower, higher, N=calcbins)
+					res2, bins2 = rebin(self._simulated_histo, lower, higher, thr, N=calcbins)
 					ratio = 1.*sum(res2)/sum(res)
 					
 				else:
 					#print (" * Using exact resampling")
 					resampled = resampling(self._simulated_histo, sum(res))
-					res2, bins2 = rebin(resampled, lower, higher, N=calcbins)
+					res2, bins2 = rebin(resampled, lower, higher, thr, N=calcbins)
 			else:
-				res2, bins2 = rebin(self._simulated_histo, lower, higher, N=calcbins)
+				res2, bins2 = rebin(self._simulated_histo, lower, higher, thr, N=calcbins)
 			
 			self.hellingertarget.setText( "%.3f"  % hellinger1(res2/ratio, res) )
 			self._target_histo_ax.bar(bins2[skip:-1], res2[skip:-1]/ratio, width=diff(bins[skip:]),  color=selected_color, label="Simulation", alpha=0.5, ec="black", linewidth=0.4, align="edge")
 
 		self._target_histo_ax.set_xscale("symlog")
 		self._target_histo_ax.set_xlim(bins[0],bins[-1])
-		# self._target_histo_figure.legend(framealpha=1.)
-		self._target_histo_ax.set_xlabel("Fluorescence", color="#A0A7B760")
-		self._target_histo_ax.set_ylabel("Cells frequency", color="#A0A7B760")
-		self._target_histo_ax.tick_params(axis='both', colors='#A0A7B7', labelcolor='#A0A7B7', grid_color='#A0A7B7')
+		
+		if self._use_dark_skin:
+			self._target_histo_ax.set_xlabel("Fluorescence", color="#A0A7B760")
+			self._target_histo_ax.set_ylabel("Cells frequency", color="#A0A7B760")
+			self._target_histo_ax.tick_params(axis='both', colors='#A0A7B7', labelcolor='#A0A7B7', grid_color='#A0A7B7')
+		else:
+			self._target_histo_ax.set_xlabel("Fluorescence", color="black")
+			self._target_histo_ax.set_ylabel("Cells frequency", color="black")
+			self._target_histo_ax.tick_params(axis='both', colors='black', labelcolor='black', grid_color='black')
 
-		#self._target_histo_ax.spines['bottom'].set_color('white')
-		#self._target_histo_ax.xaxis.label.set_color('#A0A7B7')
-		#self._target_histo_ax(axis='x', colors='#A0A7B7')
 		if self._use_dark_skin:
 			self._target_histo_ax.set_facecolor('#131721')
 			self._target_histo_ax.legend().set_visible(False)
@@ -701,6 +703,7 @@ class MainWindow(QtGui.QMainWindow):
 		self._target_histo_canvas.draw()
 
 
+
 	def _update_validation_plot(self, skip=0):
 		self._validation_histo_ax.cla()
 		if self._validation_histo is None: return
@@ -708,14 +711,15 @@ class MainWindow(QtGui.QMainWindow):
 		lower = float(self.lowerbin.value())
 		higher = float(self.higherbin.value())
 		calcbins = int(self.bins.value())
-		
+		thr = float(self.fluorescencethreshold.value())
+
 		if self.usecolors.isChecked():
 			first_color = "purple"
 		else:
 			first_color = "#DDDDDD"
 				
 		if self._validation_histo is not None:
-			res, bins = rebin(self._validation_histo, lower, higher, N=calcbins)
+			res, bins = rebin(self._validation_histo, lower, higher, thr, N=calcbins)
 			self._validation_histo_ax.bar(bins[skip:-1], res[skip:-1], width=diff(bins[skip:]),  color=first_color, label="Validation histogram", alpha=0.5, linewidth=0.4, ec="black", align="edge")
 
 		if self.usecolors.isChecked():
@@ -728,7 +732,7 @@ class MainWindow(QtGui.QMainWindow):
 			if self.normtotarget.isChecked():
 				if sum(res)>self.heuristic(): 
 					#print (" * Using approximate resampling")
-					res2, bins2 = rebin(self._simulated_validation_histo, lower, higher, N=calcbins)
+					res2, bins2 = rebin(self._simulated_validation_histo, lower, higher, thr, N=calcbins)
 					ratio = 1.*sum(res2)/sum(res)
 					
 				else:
@@ -736,7 +740,7 @@ class MainWindow(QtGui.QMainWindow):
 					resampled = resampling(self._simulated_validation_histo, sum(res))
 					res2, bins2 = rebin(resampled, lower, higher, N=calcbins)
 			else:
-				res2, bins2 = rebin(self._simulated_validation_histo, lower, higher, N=calcbins)
+				res2, bins2 = rebin(self._simulated_validation_histo, lower, higher, thr, N=calcbins)
 
 			self.hellingervalidation.setText( "%.3f"  % hellinger1(res2/ratio, res) )
 			self._validation_histo_ax.bar(bins2[skip:-1], res2[skip:-1]/ratio, width=diff(bins[skip:]),  color=selected_color, label="Simulation", alpha=0.5, ec="black", linewidth=0.4, align="edge")
@@ -745,9 +749,14 @@ class MainWindow(QtGui.QMainWindow):
 		self._validation_histo_ax.set_xlim(bins[0],bins[-1])
 		#self._validation_histo_figure.legend(framealpha=1.)
 		
-		self._validation_histo_ax.set_xlabel("Fluorescence", color="#A0A7B760")
-		self._validation_histo_ax.set_ylabel("Cells frequency", color="#A0A7B760")
-		self._validation_histo_ax.tick_params(axis='both', colors='#A0A7B7', labelcolor='#A0A7B7', grid_color='#A0A7B7')
+		if self._use_dark_skin:
+			self._validation_histo_ax.set_xlabel("Fluorescence", color="#A0A7B760")
+			self._validation_histo_ax.set_ylabel("Cells frequency", color="#A0A7B760")
+			self._validation_histo_ax.tick_params(axis='both', colors='#A0A7B7', labelcolor='#A0A7B7', grid_color='#A0A7B7')
+		else:
+			self._validation_histo_ax.set_xlabel("Fluorescence", color="black")
+			self._validation_histo_ax.set_ylabel("Cells frequency", color="black")
+			self._validation_histo_ax.tick_params(axis='both', colors='black', labelcolor='black', grid_color='black')
 
 		#	from matplotlib.lines import Line2D
 		# custom_lines = [	Line2D([0], [0], color=first_color, lw=0, marker="o" ),
@@ -814,9 +823,14 @@ class MainWindow(QtGui.QMainWindow):
 		
 		res, bins = rebin(self._initial_histo, lower, higher, N=calcbins)
 
-		self._initial_histo_ax.set_xlabel("Fluorescence", color="#A0A7B760")
-		self._initial_histo_ax.set_ylabel("Cells frequency", color="#A0A7B760")
-		self._initial_histo_ax.tick_params(axis='both', colors='#A0A7B7', labelcolor='#A0A7B7', grid_color='#A0A7B7')
+		if self._use_dark_skin:
+			self._initial_histo_ax.set_xlabel("Fluorescence", color="#A0A7B760")
+			self._initial_histo_ax.set_ylabel("Cells frequency", color="#A0A7B760")
+			self._initial_histo_ax.tick_params(axis='both', colors='#A0A7B7', labelcolor='#A0A7B7', grid_color='#A0A7B7')
+		else:
+			self._initial_histo_ax.set_xlabel("Fluorescence", color="black")
+			self._initial_histo_ax.set_ylabel("Cells frequency", color="black")
+			self._initial_histo_ax.tick_params(axis='both', colors='black', labelcolor='black', grid_color='black')
 
 		if self.usecolors.isChecked():
 			selected_color = "red"

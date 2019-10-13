@@ -5,13 +5,15 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="procell",
-    version="1.6.0",
+    version="1.6.3",
+    include_package_data=True,
     author="Marco S. Nobile",
     author_email="m.s.nobile@tue.nl",
     description="ProCell - cell proliferation framework",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/aresio/ProCell",
+    install_requires=['numpy', 'fst-pso', 'matplotlib']
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 2",
