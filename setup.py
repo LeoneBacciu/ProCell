@@ -13,7 +13,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/aresio/ProCell",
-    install_requires=['numpy', 'fst-pso', 'matplotlib']
+    install_requires=['numpy', 'fst-pso', 'matplotlib'],
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 2",
