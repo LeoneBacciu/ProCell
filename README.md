@@ -13,11 +13,15 @@ The output produced by ProCell is a histogram of GFP fluorescence after time T.
 
 ## Installing and using ProCell
 
-This part is still under development. I am setting up the GITHUB repository and currently creating a PyPI package to simplify the installation process. 
+ProCell can be easily installed with pip:
 
-Meanwhile, you can just download the source code and launch ProCell's GUI (python gui/gui.py), [designed by Luca Zanini](https://www.behance.net/gallery/84353179/-UX-UI-PROCELL).
+<code>pip install procell</code>
 
-![ProCell's GUI](https://lh5.googleusercontent.com/wj8YpG-YqbE2wkeN2kJXKiKVox_Kj3GL5kt3X9dKRRuxqqw6fTgbUNNakCGrNspP-zeGJ1fqH6sFrgQOPC94IB7jRwUZ8syAlFst85Mji6QV4NMKaZDkfbhEtpYXKNRctWt4IaTc)
+Once installed, ProCell's new GUI [designed by Luca Zanini](https://www.behance.net/gallery/84353179/-UX-UI-PROCELL) can be launched by typing:
+
+<code>python -m procell.gui</code>
+
+from the console. 
 
 A tutorial about modeling, calibration, simulation and validation will be published soon. 
 
