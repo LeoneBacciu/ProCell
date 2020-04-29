@@ -37,18 +37,23 @@ def _launch_GPU_simulation(executable, initial_histo, model_file, time_max, PHI,
 	print names
 	"""
 
-	ret = check_output([executable, "-h", initial_histo, "-c", model_file, "-t", str(time_max), "-p", str(PHI), "-r"])
-	split_rows = ret.split("\n")
-
+	command = [executable, "-h", initial_histo, "-c", model_file, "-t", str(time_max), "-p", str(PHI), "-r"]
+	#print (" ".join(command))
+	ret = check_output(command)
+	ret = ret.decode("utf-8")
+	split_rows = ret.split('\n')
 	result = defaultdict(dummy)
 	types  = defaultdict(list)
 
+
 	for row in split_rows:
 		row = row.strip("\r")
+		#print (row)
 		try:
-			tokenized_row = map(float, row.split("\t"))
+			tokenized_row = list(map(float, row.split("\t")))
 		except ValueError:
 			continue
+
 		fluorescence = tokenized_row[0]
 		total = tokenized_row[1]
 		result[fluorescence]=total

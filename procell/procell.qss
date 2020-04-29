@@ -1,3 +1,7 @@
+/*
+  Copyright (c) 2019 Luca Zanini. All rights reserved. 
+*/
+
  
 QStatusBar {
   background: #1B212F;

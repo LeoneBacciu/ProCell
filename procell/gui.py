@@ -257,7 +257,7 @@ class MainWindow(QtGui.QMainWindow):
 		#self._load_project_from_file("./prova.prc")		
 		"""
 		self._project_filename = None
-		self._version = "1.6.3"
+		self._version = "1.6.4"
 
 		# functionalities override
 		self._force_resample = False
@@ -302,7 +302,7 @@ class MainWindow(QtGui.QMainWindow):
 		sshFile=__location__ +"procell.qss"
 		with open(sshFile,"r") as fh:
 			self.setStyleSheet(fh.read())
-		print (" * Style Sheet %s loaded" % sshFile)
+		# print (" * Style Sheet %s loaded" % sshFile)
 
 	def closeEvent(self, event):
 		self._save_config()
@@ -1368,6 +1368,12 @@ class MainWindow(QtGui.QMainWindow):
 	def close(self):
 		print "Shutting down ProCell"
 	"""
+
+	def _save_simtarget_file(self):
+		if self._simulated_histo is not None:
+			path = QtGui.QFileDialog.getSaveFileName(self, 'Save histogram', ".", '*.txt')
+			if path is not None:
+				savetxt(path, self._simulated_histo)
 
 
 	def _done_optimization(self):
