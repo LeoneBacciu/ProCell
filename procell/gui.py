@@ -21,7 +21,7 @@ except:
 	from . import resources3
 from .estimator import hellinger1
 from .project import Project
-from .estimator import Calibrator
+from .estimator import Calibrator, fitness_gui
 
 from collections import defaultdict
 from PyQt4.QtGui import QApplication
@@ -1496,7 +1496,6 @@ class OptimizationThread(QThread):
 				)
 
 		#print self._solution_optimization, self._fitness_solution_optimization
-		from estimator import fitness_gui
 		self._dictionaries_results = fitness_gui(self._solution_optimization.X, arguments = {'form': self._parent}, return_dictionaries=True)
 		
 
