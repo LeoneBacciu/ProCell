@@ -1395,6 +1395,7 @@ class MainWindow(QtGui.QMainWindow):
 			self._population_std[v] = stdivs[k]
 
 		self._update_populations()
+		self.run_simulation()
 
 
 	def optimize(self):
