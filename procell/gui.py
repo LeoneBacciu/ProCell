@@ -257,7 +257,10 @@ class MainWindow(QtGui.QMainWindow):
 		#self._load_project_from_file("./prova.prc")		
 		"""
 		self._project_filename = None
-		self._version = "1.6.4"
+		import pkg_resources
+		vrs = pkg_resources.get_distribution('procell').version 
+
+		self._version = str(vrs)
 
 		# functionalities override
 		self._force_resample = False
@@ -701,6 +704,7 @@ class MainWindow(QtGui.QMainWindow):
 			self._target_histo_ax.legend()
 
 		self._target_histo_canvas.draw()
+		self._target_histo_canvas.setToolTip(self._target_histo_path)  
 
 
 
@@ -777,6 +781,7 @@ class MainWindow(QtGui.QMainWindow):
 		#self._validation_histo_figure.tight_layout()
 
 		self._validation_histo_canvas.draw()
+		self._validation_histo_canvas.setToolTip(self._validation_histo_path)  
 
 
 	def new_population(self):
@@ -860,6 +865,7 @@ class MainWindow(QtGui.QMainWindow):
 		#sns.despine(ax=self._initial_histo_ax, left=True, bottom=True)
 
 		self._initial_histo_canvas.draw()
+		self._initial_histo_canvas.setToolTip(self._initial_histo_path)  
 
 
 
@@ -905,7 +911,7 @@ class MainWindow(QtGui.QMainWindow):
 		return False
 
 	def _check_proportions(self):
-		return  (sum(self._population_proportions)-1.0)<1e-3
+		return  (abs(sum(self._population_proportions)-1.0))<1e-3
 
 
 	def run_simulation(self):
@@ -1186,9 +1192,16 @@ class MainWindow(QtGui.QMainWindow):
 		return self._get_population_data_frame().values.tolist()
 
 
-	def _simfield_updated(self):
+	def _gui_update(self):
+		self._update_all_plots()
 		self._mark_unsaved_change()
+		self.my_timer.stop()
 
+	def _simfield_updated(self):
+		self.my_timer = QtCore.QTimer()
+		self.my_timer.timeout.connect(self._gui_update)
+		self.my_timer.start(1000) #1 min intervall
+		
 
 	def _save_project_to_file(self, path):
 				
@@ -1285,6 +1298,13 @@ class MainWindow(QtGui.QMainWindow):
 		self._update_populations()
 
 	def _load_project_from_file(self, path):
+		
+		if path=="" or path is None: return None
+
+		with open(path, 'rb') as inpt:
+			P = pickle.load(inpt)
+		
+
 		try: 
 			with open(path, 'rb') as inpt:
 				P = pickle.load(inpt)

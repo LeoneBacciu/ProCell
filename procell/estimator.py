@@ -296,13 +296,20 @@ def fitness(p):
 	print ("Mean:", mean_div)
 	print ("STD:", std_div)
 
+	time_max = float(gui.simulationtime.value() ) 
+	lower = float(gui.lowerbin.value())
+	higher = float(gui.higherbin.value())
+	calcbins = int(gui.bins.value())
+	PHI      = float(gui.fluorescencethreshold.value())
+
+
 	result_simulation, result_simulation_types = Sim.simulate(
 			path=C._H0, types=C._types, proportions=proportions,
-			div_mean=mean_div, div_std=std_div, time_max=C._time_max, verbose=False, phi=11, distribution=C._distribution)
+			div_mean=mean_div, div_std=std_div, time_max=time_max, verbose=False, phi=PHI, distribution=C._distribution)
 
 	sorted_res = array(sorted([ [a,b] for (a,b) in zip(result_simulation.keys(), result_simulation.values())]))
-	result_simulation_rebinned, bins_result_simulation_rebinned = rebin(sorted_res, 1e1, 1e4, N=100)
-	target_rebinned, bins_target_rebinned   	= rebin(C.TGT, 1e1, 1e4, N=100)
+	result_simulation_rebinned, bins_result_simulation_rebinned = rebin(sorted_res, lower, higher, N=calcbins)
+	target_rebinned, bins_target_rebinned   	= rebin(gui._target_histo, lower, higher, N=calcbins)
 
 	ratio = 1.0*sum(result_simulation_rebinned)/sum(target_rebinned)
 
