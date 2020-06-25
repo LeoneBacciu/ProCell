@@ -31,7 +31,7 @@ https://docs.google.com/document/d/1OC0DDQQHAKs6sMOi7hWleWcwgU04h9RAsZzOye6dnAU/
 
 ## GPU version of ProCell
 
-We are developing a GPU-accelerated version of ProCell, able to strongly reduce the computational effort of simulations. The alpha implementation can be downloaded from: https://github.com/ericniso/cuda-pro-cell
+cuProCell is a CUDA-accelerated version of ProCell, able to strongly reduce the computational effort of simulations. The GPU implementation is provided as subpackage in this repository. Further information can be found at: https://github.com/ericniso/cuda-pro-cell
 
 ## More info about ProCell
 
