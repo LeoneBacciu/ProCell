@@ -547,14 +547,14 @@ class MainWindow(QMainWindow):
 		print ("NOT IMPLEMENTED YET")
 
 	def _message_error(self, text, title="Import error", additional=None):
-		msg = QtGui.QMessageBox()
-		msg.setIcon(QtGui.QMessageBox.Critical)
+		msg = QtWidgets.QMessageBox()
+		msg.setIcon(QtWidgets.QMessageBox.Critical)
 		msg.setText(text)
 		msg.setWindowTitle(title)
 		if additional!=None:
 			msg.setInformativeText("This is additional information")
 			msg.setDetailedText(additional)
-		msg.setStandardButtons(QtGui.QMessageBox.Ok)
+		msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
 		msg.exec_()
 
 	def _import_initial_histo(self, path):
@@ -923,7 +923,11 @@ class MainWindow(QMainWindow):
 				self.YTN = SimulationThread(self)
 				self.YTN._what="target"
 				
-				self.connect(self.YTN, QtCore.SIGNAL("finished()"), self._done_simulation)
+				# old style signals
+				# self.connect(self.YTN, QtCore.SIGNAL("finished()"), self._done_simulation)
+
+				# new style signal
+				self.YTN.finished.connect(self._done_simulation)
 
 				self.launch_simulation.setEnabled(False)
 				self.runvalidation.setEnabled(False)
@@ -938,39 +942,39 @@ class MainWindow(QMainWindow):
 				self._error_populations()
 
 	def _error_proportions(self):
-		msg = QtGui.QMessageBox()
-		msg.setIcon(QtGui.QMessageBox.Critical)
+		msg = QtWidgets.QMessageBox()
+		msg.setIcon(QtWidgets.QMessageBox.Critical)
 		msg.setText("The sum of proportions is not 1. Please check the proportion of cells.")
 		msg.setWindowTitle("Unable to run simulation")
 		ret = msg.exec_()
 
 	def _error_populations(self):
-		msg = QtGui.QMessageBox()
-		msg.setIcon(QtGui.QMessageBox.Critical)
+		msg = QtWidgets.QMessageBox()
+		msg.setIcon(QtWidgets.QMessageBox.Critical)
 		msg.setText("Populations were not specified. Cell populations are necessary to run ProCell.")
 		msg.setWindowTitle("Unable to run simulation")
 		ret = msg.exec_()
 
 	def _query_for_initial(self):
-		msg = QtGui.QMessageBox()
-		msg.setIcon(QtGui.QMessageBox.Information)
+		msg = QtWidgets.QMessageBox()
+		msg.setIcon(QtWidgets.QMessageBox.Information)
 		msg.setText("Cannot simulate without an initial fluorescence histogram.\nDo you want to import an histogram now?")
 		msg.setWindowTitle("Unable to run simulation")
-		msg.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
+		msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
 		ret = msg.exec_()
-		if ret == QtGui.QMessageBox.Yes:
+		if ret == QtWidgets.QMessageBox.Yes:
 			self.import_initial_histo()
 			return True
 		return False
 
 	def _query_for_target(self):
-		msg = QtGui.QMessageBox()
-		msg.setIcon(QtGui.QMessageBox.Information)
+		msg = QtWidgets.QMessageBox()
+		msg.setIcon(QtWidgets.QMessageBox.Information)
 		msg.setText("Cannot fit parameters without a target fluorescence histogram.\nDo you want to import an histogram now?")
 		msg.setWindowTitle("Unable to run optimization")
-		msg.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
+		msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
 		ret = msg.exec_()
-		if ret == QtGui.QMessageBox.Yes:
+		if ret == QtWidgets.QMessageBox.Yes:
 			self.import_target_histo()
 			return True
 		return False
@@ -980,7 +984,11 @@ class MainWindow(QMainWindow):
 			self.YTN = SimulationThread(self)
 			self.YTN._what="validation"
 			
-			self.connect(self.YTN, QtCore.SIGNAL("finished()"), self._done_simulation)
+			# old style signal
+			# self.connect(self.YTN, QtCore.SIGNAL("finished()"), self._done_simulation)
+
+			# new style
+			self.YTN.finished.connect(self._done_simulation)
 
 			self.launch_simulation.setEnabled(False)
 			self.runvalidation.setEnabled(False)
@@ -1130,11 +1138,11 @@ class MainWindow(QMainWindow):
 
 			print ("WARNING: no proliferating populations found, I cannot calibrate")
 
-			msg = QtGui.QMessageBox()
-			msg.setIcon(QtGui.QMessageBox.Critical)
+			msg = QtWidgets.QMessageBox()
+			msg.setIcon(QtWidgets.QMessageBox.Critical)
 			msg.setText("All the populations seem to be quiescent. Please add at least one proliferating population.")
 			msg.setWindowTitle("Unable to run optimization")
-			#msg.setStandardButtons(QtGui.QMessageBox.OK)
+			#msg.setStandardButtons(QtWidgets.QMessageBox.OK)
 			ret = msg.exec_()
 
 			return False
@@ -1149,11 +1157,11 @@ class MainWindow(QMainWindow):
 		if not ready:
 			print ("WARNING: some boundaries are not set")
 
-			msg = QtGui.QMessageBox()
-			msg.setIcon(QtGui.QMessageBox.Critical)
+			msg = QtWidgets.QMessageBox()
+			msg.setIcon(QtWidgets.QMessageBox.Critical)
 			msg.setText("Some boundaries were not set properly. Please set all boundaries (for both mean and standard deviation) before running parameters fitting.")
 			msg.setWindowTitle("Unable to run optimization")
-			#msg.setStandardButtons(QtGui.QMessageBox.OK)
+			#msg.setStandardButtons(QtWidgets.QMessageBox.OK)
 			ret = msg.exec_()
 
 			return False
@@ -1183,8 +1191,10 @@ class MainWindow(QMainWindow):
 			print ("ERROR: cannot save project")
 
 	def save_project_as(self):
-		path = QtWidgets.QFileDialog.getSaveFileName(self, 'Save project', ".", '*.prc')
+		path, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Save project', ".", '*.prc')
 		if path!="":
+
+			
 			self._save_project_to_file(path)
 			self._project_filename = str(path)
 			self._update_window_title()
@@ -1384,7 +1394,7 @@ class MainWindow(QMainWindow):
 
 		
 	def _update_statusbar(self, v):
-		self.progress.setValue(v)	
+		self.progress.setValue(int(v))	
 
 	"""
 	def close(self):
@@ -1452,7 +1462,11 @@ class MainWindow(QMainWindow):
 		print (" * All information set, creating thread")
 
 		self.OPTTHREAD = OptimizationThread(self)
-		self.connect(self.OPTTHREAD, QtCore.SIGNAL("finished()"), self._done_optimization)
+		#old style signal
+		# self.connect(self.OPTTHREAD, QtCore.SIGNAL("finished()"), self._done_optimization)
+
+		# new style 
+		self.OPTTHREAD.finished.connect(self._done_optimization)
 
 		print ("   Optimizer ready, launching optimization")
 

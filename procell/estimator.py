@@ -124,6 +124,8 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 	use_gpu = (gui._path_to_GPU_procell is not None)
 
 	def rel2abs_prob(V):
+		if len(V)==0: V = [1] # for single-population cases
+
 		putative_proportions = [V[0]]
 		consumed = V[0]
 		for p in V[1:N-1]:
