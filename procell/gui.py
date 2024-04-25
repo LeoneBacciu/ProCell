@@ -433,7 +433,7 @@ class MainWindow(QMainWindow):
 		self._preferences_window.forcecpu.setChecked(self._force_CPU)
 		self._preferences_window.forceresampling.setChecked(self._force_resample)
 
-		if self._preferences_window.exec_() == QtGui.QDialog.Accepted:
+		if self._preferences_window.exec_() == QtWidgets.QDialog.Accepted:
 			self._path_to_GPU_procell = str(self._preferences_window.path_cuprocell.text())
 			self._force_CPU = self._preferences_window.forcecpu.isChecked()
 			self._force_resample = self._preferences_window.forceresampling.isChecked()
@@ -1028,15 +1028,15 @@ class MainWindow(QMainWindow):
 
 		# population name
 		if index.column()==0: 
-			item, ok  = QtGui.QInputDialog.getText(self, "Change population name", "Enter new name:", QtGui.QLineEdit.Normal, current_value )
+			item, ok  = QtWidgets.QInputDialog.getText(self, "Change population name", "Enter new name:", QtWidgets.QLineEdit.Normal, current_value )
 			if ok and item:
 				self._population_names[index.row()] = item
 				self._update_populations()
 
 		# proportion
 		elif index.column()==1:
-			localized_input_dialog = QtGui.QInputDialog()
-			localized_input_dialog.setInputMode(QtGui.QInputDialog.DoubleInput)
+			localized_input_dialog = QtWidgets.QInputDialog()
+			localized_input_dialog.setInputMode(QtWidgets.QInputDialog.DoubleInput)
 			localized_input_dialog.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
 			localized_input_dialog.setDoubleValue(float(current_value))
 			localized_input_dialog.setDoubleMinimum(0)
@@ -1044,7 +1044,7 @@ class MainWindow(QMainWindow):
 			localized_input_dialog.setDoubleDecimals(3)
 			localized_input_dialog.setWindowTitle("Change proportion of population")
 			localized_input_dialog.setLabelText("Enter new proportion:")
-			if localized_input_dialog.exec_()==QtGui.QDialog.Accepted:
+			if localized_input_dialog.exec_()==QtWidgets.QDialog.Accepted:
 				item = localized_input_dialog.doubleValue()
 				self._population_proportions[index.row()] = item
 				self._update_populations()
@@ -1052,7 +1052,7 @@ class MainWindow(QMainWindow):
 		# mean division time
 		elif index.column()==2:
 			# item, ok  = QtGui.QInputDialog.getDouble(self, "Change division time", "Enter new mean division time:", float(current_value), 0)
-			item, ok  = QtGui.QInputDialog.getText(self, "Change division time", "Enter new mean division time:", QtGui.QLineEdit.Normal, current_value)
+			item, ok  = QtWidgets.QInputDialog.getText(self, "Change division time", "Enter new mean division time:", QtWidgets.QLineEdit.Normal, current_value)
 			if ok and item:
 				try:
 					value = float(item)
@@ -1071,8 +1071,8 @@ class MainWindow(QMainWindow):
 
 		# standard deviation of division time
 		elif index.column()==3:
-			#item, ok  = QtGui.QInputDialog.getDouble(self, "Change division time", "Enter standard deviation of division time:", float(current_value), 0)
-			item, ok  = QtGui.QInputDialog.getText(self, "Change division time", "Enter standard deviation of division time:", QtGui.QLineEdit.Normal, current_value)
+			#item, ok  = QtWidgets.QInputDialog.getDouble(self, "Change division time", "Enter standard deviation of division time:", float(current_value), 0)
+			item, ok  = QtWidgets.QInputDialog.getText(self, "Change division time", "Enter standard deviation of division time:", QtWidgets.QLineEdit.Normal, current_value)
 			if ok and item:
 				try: 
 					self._population_std[index.row()] = float(item)
@@ -1089,35 +1089,35 @@ class MainWindow(QMainWindow):
 
 		# min div time
 		elif index.column()==4:
-			item, ok  = QtGui.QInputDialog.getDouble(self, "Search space", "Enter minimum value for mean division time:", float(current_value), 0)
+			item, ok  = QtWidgets.QInputDialog.getDouble(self, "Search space", "Enter minimum value for mean division time:", float(current_value), 0)
 			if ok and item:
 				self._population_minmean[index.row()] = item
 				self._update_populations()
 
 		# max div time
 		elif index.column()==5:
-			item, ok  = QtGui.QInputDialog.getDouble(self, "Search space", "Enter maximum value for mean division time:", float(current_value), 0)
+			item, ok  = QtWidgets.QInputDialog.getDouble(self, "Search space", "Enter maximum value for mean division time:", float(current_value), 0)
 			if ok and item:
 				self._population_maxmean[index.row()] = item
 				self._update_populations()
 
 		# min std
 		elif index.column()==6:
-			item, ok  = QtGui.QInputDialog.getDouble(self, "Search space", "Enter minimum value for standard deviation:", float(current_value), 0, 1e6, 3)
+			item, ok  = QtWidgets.QInputDialog.getDouble(self, "Search space", "Enter minimum value for standard deviation:", float(current_value), 0, 1e6, 3)
 			if ok and item:
 				self._population_minsd[index.row()] = item
 				self._update_populations()
 
 		# max std
 		elif index.column()==7:
-			item, ok  = QtGui.QInputDialog.getDouble(self, "Search space", "Enter maximum value for standard deviation:", float(current_value),  0, 1e6, 3)
+			item, ok  = QtWidgets.QInputDialog.getDouble(self, "Search space", "Enter maximum value for standard deviation:", float(current_value),  0, 1e6, 3)
 			if ok and item:
 				self._population_maxsd[index.row()] = item
 				self._update_populations()
 
 		# info
 		elif index.column()==8:
-			item, ok  = QtGui.QInputDialog.getText(self, "Additional information", "Enter miscellanea information about the population:", QtGui.QLineEdit.Normal, str(current_value))
+			item, ok  = QtWidgets.QInputDialog.getText(self, "Additional information", "Enter miscellanea information about the population:", QtWidgets.QLineEdit.Normal, str(current_value))
 			if ok and item:
 				self._population_info[index.row()] = item
 				self._update_populations()
