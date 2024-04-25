@@ -1,20 +1,21 @@
-from __future__ import print_function
-import sip
-sip.setapi('QVariant', 2)
+#from __future__ import print_function
+#import sip
+#sip.setapi('QVariant', 2)
 import pickle, os, sys
 from os import sep
-from PyQt4 import QtGui, QtCore, uic
+from PyQt5 import QtGui, QtCore, uic, QtWidgets
 from numpy import loadtxt
 from numpy.random import uniform
 from .procell_core import Simulator
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from pylab import *
 import pandas as pd
-from PyQt4.QtCore import QThread, pyqtSignal
+#from PyQt4.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal
 try:
 	from . import resources
 except:
@@ -24,7 +25,8 @@ from .project import Project
 from .estimator import Calibrator, fitness_gui
 
 from collections import defaultdict
-from PyQt4.QtGui import QApplication
+#from PyQt4.QtGui import QApplication
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog
 try:
 	import seaborn as sns  
 	sns.despine()
@@ -161,23 +163,23 @@ class PandasModel(QtCore.QAbstractTableModel):
 	def flags(self, index):
 		return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable #| QtCore.Qt.ItemIsEditable
 
-class AboutWindow(QtGui.QMainWindow):
+class AboutWindow(QMainWindow):
 
 	def __init__(self):
 		super(AboutWindow, self).__init__()
 		uic.loadUi(__location__ +'about2.ui', self)
 		
-class PreferencesWindow(QtGui.QDialog):
+class PreferencesWindow(QDialog):
 
 	def __init__(self):
 		super(PreferencesWindow, self).__init__()
 		uic.loadUi(__location__ +'preferences.ui', self)
 
 	def browse(self):
-		fname = QtGui.QFileDialog.getOpenFileName(self, 'Open executable file', '.', "Executable files (*.*)")
+		fname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open executable file', '.', "Executable files (*.*)")
 		self.path_cuprocell.setText(str(fname))
 
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(QMainWindow):
 
 	def __init__(self):
 		super(MainWindow, self).__init__()
@@ -240,12 +242,12 @@ class MainWindow(QtGui.QMainWindow):
 		self.Simulator = Simulator()
 
 		# status bar
-		self.statusBar = QtGui.QStatusBar()
+		self.statusBar = QtWidgets.QStatusBar()
 		self.setStatusBar(self.statusBar)
 		self.statusBar.showMessage("ProCell ready.")
 
 		# progress bar
-		self.progress = QtGui.QProgressBar()
+		self.progress = QtWidgets.QProgressBar()
 		self.progress.setRange(0,100)
 		self.statusBar.addPermanentWidget(self.progress)
 
@@ -294,10 +296,10 @@ class MainWindow(QtGui.QMainWindow):
 
 
 	def _place_logo(self):
-		label = QtGui.QLabel("Prova", self)
+		label = QtWidgets.QLabel("Prova", self)
 		mypix = QtGui.QPixmap (":/buttons/procell_logo_small.png")
 		label.setPixmap(mypix)
-		label.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Ignored)
+		label.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Ignored)
 		self.menubar.setCornerWidget(label, QtCore.Qt.TopRightCorner)
 
 
@@ -606,7 +608,7 @@ class MainWindow(QtGui.QMainWindow):
 
 	def import_target_histo(self):
 		# open dialog
-		fname = QtGui.QFileDialog.getOpenFileName(self, 'Open histogram file', self._last_histogram_import_path, "Histogram files (*.fcs *.txt)")
+		fname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open histogram file', self._last_histogram_import_path, "Histogram files (*.fcs *.txt)")
 
 		# import file
 		if fname!="":
@@ -618,7 +620,7 @@ class MainWindow(QtGui.QMainWindow):
 
 	def import_validation_histo(self):
 		# open dialog
-		fname = QtGui.QFileDialog.getOpenFileName(self, 'Open histogram file', self._last_histogram_import_path, "Histogram files (*.fcs *.txt)")
+		fname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open histogram file', self._last_histogram_import_path, "Histogram files (*.fcs *.txt)")
 
 		# import file
 		if fname!="":
@@ -808,7 +810,7 @@ class MainWindow(QtGui.QMainWindow):
 
 	def import_initial_histo(self):
 		# open dialog
-		fname = QtGui.QFileDialog.getOpenFileName(self, 'Open histogram file', self._last_histogram_import_path,"Histogram files (*.fcs *.txt)")
+		fname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open histogram file', self._last_histogram_import_path,"Histogram files (*.fcs *.txt)")
 
 		# import file
 		if fname!="":
@@ -874,7 +876,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
 	def save_figures(self):
-		file = str(QtGui.QFileDialog.getExistingDirectory(self, "Select Directory", self._last_figure_export_path))
+		file = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory", self._last_figure_export_path))
 		if file is not None:
 			self._use_dark_skin = False
 			self._update_all_plots()
@@ -1181,7 +1183,7 @@ class MainWindow(QtGui.QMainWindow):
 			print ("ERROR: cannot save project")
 
 	def save_project_as(self):
-		path = QtGui.QFileDialog.getSaveFileName(self, 'Save project', ".", '*.prc')
+		path = QtWidgets.QFileDialog.getSaveFileName(self, 'Save project', ".", '*.prc')
 		if path!="":
 			self._save_project_to_file(path)
 			self._project_filename = str(path)
@@ -1248,7 +1250,7 @@ class MainWindow(QtGui.QMainWindow):
 			return False
 
 	def open_project(self):
-		fname = QtGui.QFileDialog.getOpenFileName(self, 'Open project', '.' ,"ProCell file (*.prc)")		
+		fname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open project', '.' ,"ProCell file (*.prc)")		
 		if fname is not None:
 			self._load_project_from_file(fname)
 			
@@ -1391,7 +1393,7 @@ class MainWindow(QtGui.QMainWindow):
 
 	def _save_simtarget_file(self):
 		if self._simulated_histo is not None:
-			path = QtGui.QFileDialog.getSaveFileName(self, 'Save histogram', ".", '*.txt')
+			path = QtWidgets.QFileDialog.getSaveFileName(self, 'Save histogram', ".", '*.txt')
 			if path is not None:
 				savetxt(path, self._simulated_histo)
 
@@ -1675,13 +1677,13 @@ class SimulationThread(QThread):
 
 
 def main():
-	app	= QtGui.QApplication(sys.argv)
+	app	= QtWidgets.QApplication(sys.argv)
 	window = MainWindow()
 	sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
 	
-	app	= QtGui.QApplication(sys.argv)
+	app	= QtWidgets.QApplication(sys.argv)
 	window = MainWindow()
 	sys.exit(app.exec_())

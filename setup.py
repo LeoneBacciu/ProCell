@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="procell",
-    version="1.7.0",
+    version="1.8.0",
     include_package_data=True,
     author="Marco S. Nobile",
     author_email="m.s.nobile@tue.nl",
@@ -13,7 +13,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/aresio/ProCell",
-    install_requires=['numpy', 'fst-pso', 'matplotlib', 'simpful', 'miniful', 'pandas'],
+    install_requires=['numpy', 'fst-pso', 'matplotlib', 'simpful', 'miniful', 'pyqt5', 'pandas'],
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
