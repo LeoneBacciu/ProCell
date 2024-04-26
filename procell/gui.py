@@ -1434,6 +1434,9 @@ class MainWindow(QMainWindow):
 		self._update_populations()
 		self.run_simulation()
 
+		# test
+		self.launchoptimization.setEnabled(True)
+
 
 	def optimize(self):
 
@@ -1472,6 +1475,9 @@ class MainWindow(QMainWindow):
 
 		# new style 
 		self.OPTTHREAD.finished.connect(self._done_optimization)
+
+		# test
+		self.launchoptimization.setEnabled(False)
 
 		print ("   Optimizer ready, launching optimization")
 
