@@ -1408,7 +1408,7 @@ class MainWindow(QMainWindow):
 
 	def _save_simtarget_file(self):
 		if self._simulated_histo is not None:
-			path = QtWidgets.QFileDialog.getSaveFileName(self, 'Save histogram', ".", '*.txt')
+			path,_ = QtWidgets.QFileDialog.getSaveFileName(self, 'Save histogram', ".", '*.txt')
 			if path is not None:
 				savetxt(path, self._simulated_histo)
 
