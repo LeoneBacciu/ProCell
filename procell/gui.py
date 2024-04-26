@@ -880,9 +880,14 @@ class MainWindow(QMainWindow):
 		if file is not None:
 			self._use_dark_skin = False
 			self._update_all_plots()
-			self._initial_histo_figure.savefig(file+os.sep+"initial_histogram.pdf", figsize=(10,7), dpi=300)
-			self._target_histo_figure.savefig(file+os.sep+"target_histogram.pdf", figsize=(10,7), dpi=300)
-			self._validation_histo_figure.savefig(file+os.sep+"validation_histogram.pdf", figsize=(10,7), dpi=300)
+
+			# self._initial_histo_figure.savefig(file+os.sep+"initial_histogram.pdf", figsize=(10,7), dpi=300)
+			# self._target_histo_figure.savefig(file+os.sep+"target_histogram.pdf", figsize=(10,7), dpi=300)
+			# self._validation_histo_figure.savefig(file+os.sep+"validation_histogram.pdf", figsize=(10,7), dpi=300)
+			
+			self._initial_histo_figure.savefig(file+os.sep+"initial_histogram.pdf", dpi=300)
+			self._target_histo_figure.savefig(file+os.sep+"target_histogram.pdf",  dpi=300)
+			self._validation_histo_figure.savefig(file+os.sep+"validation_histogram.pdf",  dpi=300)
 			self._use_dark_skin = True
 			self._update_all_plots()
 			self._last_figure_export_path = file
