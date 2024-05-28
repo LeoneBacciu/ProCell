@@ -1720,10 +1720,13 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSave_simulated_validation_histogram">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Save simulated validation histogram...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+V</string>
    </property>
   </action>
  </widget>
@@ -2265,6 +2268,22 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionSave_simulated_validation_histogram</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>_save_simvalidation_file()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>656</x>
+     <y>496</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>drop_histogram()</slot>
@@ -2294,5 +2313,6 @@ p, li { white-space: pre-wrap; }
   <slot>_reload_qss()</slot>
   <slot>_simfield_updated()</slot>
   <slot>_save_simtarget_file()</slot>
+  <slot>_save_simvalidation_file()</slot>
  </slots>
 </ui>

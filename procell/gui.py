@@ -1412,6 +1412,11 @@ class MainWindow(QMainWindow):
 			if path is not None:
 				savetxt(path, self._simulated_histo)
 
+	def _save_simvalidation_file(self):
+		if self._simulated_histo is not None:
+			path,_ = QtWidgets.QFileDialog.getSaveFileName(self, 'Save histogram', ".", '*.txt')
+			if path is not None:
+				savetxt(path, self._validation_histo)
 
 	def _done_optimization(self):
 		result_optimization = self.OPTTHREAD._dictionaries_results
