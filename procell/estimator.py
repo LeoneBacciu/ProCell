@@ -111,7 +111,8 @@ def fitness_evaluate(CP, TGT, N=1000, draw=False):
 		ylabel("Frequency")
 		show()
 
-	fitness = sum(abs(res1-res2))
+	#fitness = sum(abs(res1-res2))
+	fitness = hellinger1(res1, res2)
 	return fitness, stats.ks_2samp(res1, res2)
 
 
@@ -149,9 +150,9 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 			pos+=1
 		else:
 			if use_gpu:
-				putative_means.append(-1)  # used by CPU version
+				putative_means.append(-1) 					# used by GPU version
 			else:
-				putative_means.append(sys.float_info.max)  # used by CPU version
+				putative_means.append(sys.float_info.max)	# used by CPU version
 
 	mean_div      = dict(zip(names, putative_means))
 
@@ -162,11 +163,11 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 			pos+=1
 		else:
 			if use_gpu:
-				putative_std.append(-1)
+				putative_std.append(-1)						# used by GPU version
 			else:
 				putative_std.append(0)						# used by CPU version
 
-	std_div       = dict(zip(names, putative_std))	
+	std_div = dict(zip(names, putative_std))	
 
 	print ("Testing the following parameterization:")
 	print (" - Proportions:", proportions)
@@ -214,6 +215,7 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 				distribution="gauss"
 			)
 
+	# rebinning
 	sorted_res = array(sorted([ [a,b] for (a,b) in zip(result_simulation.keys(), result_simulation.values())]))
 	result_simulation_rebinned, bins_result_simulation_rebinned = rebin(sorted_res, lower, higher, N=calcbins)
 	target_rebinned, bins_target_rebinned   	= rebin(gui._target_histo, lower, higher, N=calcbins)
@@ -227,7 +229,7 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 
 
 
-
+"""
 def fitness(p):
 
 	global C
@@ -327,6 +329,7 @@ def fitness(p):
 
 	return fitness
 
+"""
 
 class Calibrator(object):
 
@@ -465,7 +468,6 @@ class Calibrator(object):
 			dump_best_fitness=FP.dump_fitness, 
 			dump_best_solution=FP.dump_struct)
 
-
 	def calibrate_gui(self, repetition=0, max_iter=10, search_space=None, 
 		swarm_size=50, form=None, append_time_stamp=False, loginit=False):
 
@@ -501,7 +503,8 @@ class Calibrator(object):
 		return FP.solve_with_fstpso(creation_method={'name': logtype}, 			
 			max_iter=max_iter, 
 			dump_best_fitness=FP.dump_fitness, 
-			dump_best_solution=FP.dump_struct
+			dump_best_solution=FP.dump_struct,
+			#initial_guess_list = [[0.5, 25,30, 1,1]]
 		)
 
 

@@ -6,6 +6,7 @@ from os import sep
 from PyQt5 import QtGui, QtCore, uic, QtWidgets
 from numpy import loadtxt
 from numpy.random import uniform
+from random import sample
 from .procell_core import Simulator
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -75,8 +76,13 @@ def rebin(series, lower, upper, thr=0, N=1000):
 	return res, bins
 
 def resampling(series, events):
-	from random import sample
-	total_simulated_events = int(sum(series.T[1]))
+	try:	
+		total_simulated_events = int(sum(series.T[1]))
+	except:
+		print("ERROR: unexpected data from simulation, aborting.")
+		print (series)
+		exit()
+
 	if events>total_simulated_events:
 		events_to_keep = range(total_simulated_events)
 	else:
@@ -1102,28 +1108,44 @@ class MainWindow(QMainWindow):
 
 		# min div time
 		elif index.column()==4:
-			item, ok  = QtWidgets.QInputDialog.getDouble(self, "Search space", "Enter minimum value for mean division time:", float(current_value), 0)
+			if isinstance(current_value,float):
+				cv = float(current_value)
+			else:
+				cv = 0
+			item, ok  = QtWidgets.QInputDialog.getDouble(self, "Search space", "Enter minimum value for mean division time:", cv, 0)
 			if ok and item:
 				self._population_minmean[index.row()] = item
 				self._update_populations()
 
 		# max div time
 		elif index.column()==5:
-			item, ok  = QtWidgets.QInputDialog.getDouble(self, "Search space", "Enter maximum value for mean division time:", float(current_value), 0)
+			if isinstance(current_value,float):
+				cv = float(current_value)
+			else:
+				cv = 0
+			item, ok  = QtWidgets.QInputDialog.getDouble(self, "Search space", "Enter maximum value for mean division time:", cv, 0)
 			if ok and item:
 				self._population_maxmean[index.row()] = item
 				self._update_populations()
 
 		# min std
 		elif index.column()==6:
-			item, ok  = QtWidgets.QInputDialog.getDouble(self, "Search space", "Enter minimum value for standard deviation:", float(current_value), 0, 1e6, 3)
+			if isinstance(current_value,float):
+				cv = float(current_value)
+			else:
+				cv = 0
+			item, ok  = QtWidgets.QInputDialog.getDouble(self, "Search space", "Enter minimum value for standard deviation:", cv, 0, 1e6, 3)
 			if ok and item:
 				self._population_minsd[index.row()] = item
 				self._update_populations()
 
 		# max std
 		elif index.column()==7:
-			item, ok  = QtWidgets.QInputDialog.getDouble(self, "Search space", "Enter maximum value for standard deviation:", float(current_value),  0, 1e6, 3)
+			if isinstance(current_value,float):
+				cv = float(current_value)
+			else:
+				cv = 0
+			item, ok  = QtWidgets.QInputDialog.getDouble(self, "Search space", "Enter maximum value for standard deviation:", cv,  0, 1e6, 3)
 			if ok and item:
 				self._population_maxsd[index.row()] = item
 				self._update_populations()

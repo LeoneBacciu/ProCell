@@ -9,6 +9,10 @@ def rebin(series, lower, upper, N=1000):
 	for k,v in zip(series.T[0], series.T[1]):
 		while(k>bins[pos]):
 			pos+=1
+			if pos>=N:
+				print("ERROR: bins exceeded, this should never happen, aborting.")
+				print(lower,upper,N)
+				exit()
 		res[pos] += v
 	return res, bins
 	
