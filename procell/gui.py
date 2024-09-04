@@ -1013,7 +1013,6 @@ class MainWindow(QMainWindow):
 		if not self.Simulator._abort_variable:
 
 			sorted_res = array(sorted(result_simulation.items()))
-			print('sorted res:', sorted_res)
 
 			if self.YTN._what == "target":
 				self._simulated_histo = sorted_res
