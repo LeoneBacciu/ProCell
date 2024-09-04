@@ -216,7 +216,7 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 			)
 
 	# rebinning
-	sorted_res = array(sorted([ [a,b] for (a,b) in zip(result_simulation.keys(), result_simulation.values())]))
+	sorted_res = array(sorted(result_simulation.items()))
 	result_simulation_rebinned, bins_result_simulation_rebinned = rebin(sorted_res, lower, higher, N=calcbins)
 	target_rebinned, bins_target_rebinned   	= rebin(gui._target_histo, lower, higher, N=calcbins)
 	ratio = 1.0*sum(result_simulation_rebinned)/sum(target_rebinned)

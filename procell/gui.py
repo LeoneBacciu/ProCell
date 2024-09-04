@@ -86,7 +86,8 @@ def resampling(series, events):
 	if events>total_simulated_events:
 		events_to_keep = range(total_simulated_events)
 	else:
-		events_to_keep = sample(range(total_simulated_events), events)
+		from random import sample as spl
+		events_to_keep = spl(range(total_simulated_events), events)
 	new_dict = defaultdict(dummy)
 	for etk in events_to_keep:
 		#print ("_determining fluorescence for event number %d" % etk)
@@ -1011,7 +1012,8 @@ class MainWindow(QMainWindow):
 
 		if not self.Simulator._abort_variable:
 
-			sorted_res = array(sorted([ [a,b] for (a,b) in zip(result_simulation.keys(), result_simulation.values())]))
+			sorted_res = array(sorted(result_simulation.items()))
+			print('sorted res:', sorted_res)
 
 			if self.YTN._what == "target":
 				self._simulated_histo = sorted_res
@@ -1703,17 +1705,26 @@ class SimulationThread(QThread):
 			means 			= dict(zip(self._parent._population_names, fixed_means))
 			stdev 			= dict(zip(self._parent._population_names, fixed_std))
 
-			self.result_simulation, self.result_simulation_types = self._parent.Simulator.simulate(
-				path=self._parent._initial_histo_path, 
-				types=self._parent._population_names, 
+			sim = Simulator()
+			self.result_simulation, self.result_simulation_types = sim.simulate(
+				path=self._parent._initial_histo_path,
+				types=self._parent._population_names,
 				proportions=proportions,
-				div_mean=means, 
-				div_std=stdev, 
-				time_max=time_max, 
-				verbose=False, 
-				phi=PHI, 
-				distribution="gauss", 
-				synchronous_start=False)
+				div_mean=means,
+				div_std=stdev,
+				time_max=time_max,
+				verbose=False,
+				phi=PHI,
+				distribution="gauss",
+				# synchronous_start=False
+			)
+			print(f'simulation params:\n'
+				  f'path={self._parent._initial_histo_path}\n'
+				  f'types={self._parent._population_names}\n'
+				  f'proportions={proportions}\n'
+				  f'div_mean={means} - stdev={stdev}\n'
+				  f'time_max={time_max} - PHI={PHI}\n'
+			)
 
 
 			if self._parent.Simulator._abort_variable:
