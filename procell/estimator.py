@@ -212,7 +212,8 @@ def fitness_gui(p, arguments, return_dictionaries=False):
 				time_max=time_max, 
 				verbose=False, 
 				phi=phi, 
-				distribution="gauss"
+				distribution="gauss",
+				synchronous_start=not gui.asyncr.isChecked()
 			)
 
 	# rebinning

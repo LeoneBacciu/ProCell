@@ -1705,8 +1705,7 @@ class SimulationThread(QThread):
 			means 			= dict(zip(self._parent._population_names, fixed_means))
 			stdev 			= dict(zip(self._parent._population_names, fixed_std))
 
-			sim = Simulator()
-			self.result_simulation, self.result_simulation_types = sim.simulate(
+			self.result_simulation, self.result_simulation_types = self._parent.Simulator.simulate(
 				path=self._parent._initial_histo_path,
 				types=self._parent._population_names,
 				proportions=proportions,
@@ -1716,16 +1715,8 @@ class SimulationThread(QThread):
 				verbose=False,
 				phi=PHI,
 				distribution="gauss",
-				# synchronous_start=False
+				synchronous_start=not self._parent.asyncr.isChecked()
 			)
-			print(f'simulation params:\n'
-				  f'path={self._parent._initial_histo_path}\n'
-				  f'types={self._parent._population_names}\n'
-				  f'proportions={proportions}\n'
-				  f'div_mean={means} - stdev={stdev}\n'
-				  f'time_max={time_max} - PHI={PHI}\n'
-			)
-
 
 			if self._parent.Simulator._abort_variable:
 				print (" * Simulation aborted successfully")
